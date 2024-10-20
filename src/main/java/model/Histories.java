@@ -1,8 +1,9 @@
 package model;
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
 
-public class Histories {
+public class Histories implements Serializable {
     private int id;
     private LocalDateTime timeStart;
     private LocalDateTime timeEnd;
