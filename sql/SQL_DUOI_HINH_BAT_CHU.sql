@@ -38,6 +38,12 @@ create table histories (
     FOREIGN KEY (ownerId) REFERENCES users(id)
 );	
 
+CREATE TABLE rooms (
+    roomId VARCHAR(255) PRIMARY KEY,
+    playerCount INT DEFAULT 0,
+    isFull BOOLEAN DEFAULT FALSE
+);
+
 INSERT INTO users (username, password, numberOfGame, numberOfWin, numberOfDraw, isOnline, isPlaying, avatar) VALUES
 ('hoangminhkhuong', '123456', 10, 5, 2, true, false, 'avatar1.jpg'),
 ('nguyenhaidang', '123456', 15, 8, 3, false, false, 'avatar2.jpg'),
