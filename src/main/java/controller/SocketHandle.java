@@ -39,20 +39,33 @@ public class SocketHandle implements Runnable{
             // nhận dữ liệu từ client
             Message receiveMessage = (Message) this.ois.readObject();
             String type = receiveMessage.getType();
+
             switch (type) {
                 case "LOGIN_REQUEST": {
                     Users user = (Users) receiveMessage.getObject();
                     if(userDao.verifyUser(user) != null) {
                         this.user = userDao.verifyUser(user);
                         // gửi dữ liệu sang client
-                        Message sendMessage = new Message("LOGIN_OK", "Đăng nhập thành công");
+                        Message sendMessage = new Message("LOGIN_SUCCESS", this.user);
                         this.oos.writeObject(sendMessage);
                     }
                     else {
-                        Message sendMessage = new Message("LOGIN_FAIL", "Đăng nhập thất bại");
+                        Message sendMessage = new Message("LOGIN_FAIL", null);
                         this.oos.writeObject(sendMessage);
                     }
                     break;
+                }
+                case "REGISTER_REQUEST": {
+                    Users user = (Users) receiveMessage.getObject();
+                    boolean isRegisted = userDao.register(user);
+                    if(isRegisted) {
+                        Message sendMessage = new Message("REGISTER_SUCCESS", true);
+                        this.oos.writeObject(sendMessage);
+                    }
+                    else {
+                        Message sendMessage = new Message("REGISTER_FAIL", false);
+                        this.oos.writeObject(sendMessage);
+                    }
                 }
 
             }

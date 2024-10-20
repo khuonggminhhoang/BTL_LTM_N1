@@ -4,6 +4,7 @@ import model.Users;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 
 public class UserDAO extends DAO {
     public UserDAO() {
@@ -38,5 +39,33 @@ public class UserDAO extends DAO {
         }
 
         return null;
+    }
+
+    public boolean register(Users user) {
+        try {
+            String sql = "SELECT * FROM users WHERE username=?";
+            PreparedStatement pstm = this.conn.prepareStatement(sql);
+            pstm.setString(1, user.getUsername());
+            ResultSet rs = pstm.executeQuery();
+            if(rs.next()) {
+                return false;       // user đã tồn tại
+            }
+
+            String sqlz = "INSERT INTO users(username, password, numberOfGame, numberOfWin, numberOfDraw, isOnline, isPlaying, avatar) values (?, ?, ?, ?, ?, ?, ?, ?)";
+            PreparedStatement pstmz = this.conn.prepareStatement(sqlz);
+            pstmz.setString(1, user.getUsername());
+            pstmz.setString(2, user.getPassword());
+            pstmz.setInt(3, 0);
+            pstmz.setInt(4, 0);
+            pstmz.setInt(5, 0);
+            pstmz.setBoolean(6, false);
+            pstmz.setBoolean(7, false);
+            pstmz.setString(8, user.getAvatar());
+
+            int tmp = pstmz.executeUpdate();
+            return tmp > 0;             // đăng ký thành công
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 }
