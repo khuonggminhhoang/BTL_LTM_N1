@@ -50,7 +50,7 @@ public class SocketHandle implements Runnable{
                         this.oos.writeObject(sendMessage);
                     }
                     else {
-                        Message sendMessage = new Message("LOGIN_FAIL", null);
+                        Message sendMessage = new Message("LOGIN_FAIL", "Sai tên tài khoản hoặc mật khẩu");
                         this.oos.writeObject(sendMessage);
                     }
                     break;
@@ -59,13 +59,28 @@ public class SocketHandle implements Runnable{
                     Users user = (Users) receiveMessage.getObject();
                     boolean isRegisted = userDao.register(user);
                     if(isRegisted) {
-                        Message sendMessage = new Message("REGISTER_SUCCESS", true);
+                        Message sendMessage = new Message("REGISTER_SUCCESS", "Đăng ký tài khoản thành công");
                         this.oos.writeObject(sendMessage);
                     }
                     else {
-                        Message sendMessage = new Message("REGISTER_FAIL", false);
+                        Message sendMessage = new Message("REGISTER_FAIL", "Tên tài khoản đã tồn tại");
                         this.oos.writeObject(sendMessage);
                     }
+                    break;
+                }
+                case "CHANGE_PASSWORD_REQUEST": {
+                    Users user = (Users) receiveMessage.getObject();
+                    boolean isChanged = userDao.changePassword(user);
+                    if(isChanged) {
+                        Message sendMessage = new Message("CHANGE_PASSWORD_SUCCESS", "Thay đổi mật khẩu thành công");
+                        this.oos.writeObject(sendMessage);
+                    }
+                    else {
+                        Message sendMessage = new Message("CHANGE_PASSWORD_FAIL", "Tên tài khoản không tồn tại hoặc mật khẩu mới bị trùng");
+                        this.oos.writeObject(sendMessage);
+                    }
+
+                    break;
                 }
 
             }
