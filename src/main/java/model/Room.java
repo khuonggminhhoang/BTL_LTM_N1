@@ -1,24 +1,24 @@
 package model;
 
 public class Room {
-    private String id;
+
+    private int id;
     private Users[] players = new Users[2];
-    private String password;
     private int playerCount = 0;
     private boolean isFull;
 
-    public Room(String id,  int playerCount, boolean isFull) {
+    public Room(int id) {
+        this.id = id;
+    }
+
+    public Room(int id,  int playerCount, boolean isFull) {
         this.id = id;
         this.playerCount = playerCount;
         this.isFull = isFull;
     }
 
     public boolean isFull() {
-        return playerCount == 2;
-    }
-
-    public Room(String id) {
-        this.id = id;
+        return playerCount > 1;
     }
 
     public boolean addPlayer(Users player) {
@@ -43,26 +43,12 @@ public class Room {
         this.isFull = (playerCount == 2);
     }
 
-    public Room(String password, String id) {
-        this.password = password;
-        this.id = id;
-    }
-
-    public String getId() {
+    public int getId() {
         return id;
     }
 
-    public void setId(String id) {
+    public void setId(int id) {
         this.id = id;
     }
 
-
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
 }

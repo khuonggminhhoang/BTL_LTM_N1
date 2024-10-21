@@ -49,12 +49,10 @@ public class SocketHandle implements Runnable{
                         this.user = userDao.verifyUser(user);
                         // gửi dữ liệu sang client
                         Message sendMessage = new Message("LOGIN_SUCCESS", this.user);
-                        System.out.println("Sending LOGIN_SUCCESS to client");
                         this.oos.writeObject(sendMessage);
                     }
                     else {
                         Message sendMessage = new Message("LOGIN_FAIL", "Sai tên tài khoản hoặc mật khẩu");
-                        System.out.println("Sending LOGIN_FAIL to client");
                         this.oos.writeObject(sendMessage);
                     }
                     break;
@@ -147,8 +145,9 @@ public class SocketHandle implements Runnable{
                     break;
                 }
 
-            }
 
+
+            }
 
             // đóng socket
             this.closeSocket();

@@ -20,18 +20,19 @@ public class UserDAO extends DAO {
             pstm.setString(2, user.getPassword());
             ResultSet rs = pstm.executeQuery();
 
-            rs.next();
-            return new Users(
-                    rs.getInt(1),
-                    rs.getString(2),
-                    rs.getString(3),
-                    rs.getInt(4),
-                    rs.getInt(5),
-                    rs.getInt(6),
-                    rs.getBoolean(7),
-                    rs.getBoolean(8),
-                    rs.getString(9)
-            );
+            if(rs.next()) {
+                return new Users(
+                        rs.getInt(1),
+                        rs.getString(2),
+                        rs.getString(3),
+                        rs.getInt(4),
+                        rs.getInt(5),
+                        rs.getInt(6),
+                        rs.getBoolean(7),
+                        rs.getBoolean(8),
+                        rs.getString(9)
+                );
+            }
         }
         catch( Exception e) {
             e.printStackTrace();
