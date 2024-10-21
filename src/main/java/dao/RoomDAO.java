@@ -24,6 +24,7 @@ public class RoomDAO extends DAO {
             int rows = pstm.executeUpdate();
             return rows > 0; // Trả về true nếu thêm thành công
         } catch (SQLException e) {
+            System.out.println("SQLException: createRoom");
             e.printStackTrace();
         }
         return false;
@@ -71,7 +72,7 @@ public class RoomDAO extends DAO {
     // Xóa phòng khỏi cơ sở dữ liệu
     public boolean deleteRoom(String roomId) {
         try {
-            String sql = "DELETE FROM rooms WHERE roomId = ?";
+            String sql = "DELETE F ROM rooms WHERE roomId = ?";
             PreparedStatement pstm = this.conn.prepareStatement(sql);
             pstm.setString(1, roomId);
 

@@ -37,6 +37,12 @@ public class Room {
     public int getPlayerCount() {
         return playerCount;
     }
+
+    public void setPlayerCount(int playerCount) {
+        this.playerCount = playerCount;
+        this.isFull = (playerCount == 2);
+    }
+
     public Room(String password, String id) {
         this.password = password;
         this.id = id;
