@@ -1,54 +1,62 @@
 package model;
 
-public class Room {
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
+public class Room implements Serializable {
     private int id;
-    private Users[] players = new Users[2];
-    private int playerCount = 0;
-    private boolean isFull;
+    private Users user1;
+    private Users user2;
+    List<Questions> lstQuestion;
+
+    public Room() {}
 
     public Room(int id) {
         this.id = id;
-    }
-
-    public Room(int id,  int playerCount, boolean isFull) {
-        this.id = id;
-        this.playerCount = playerCount;
-        this.isFull = isFull;
-    }
-
-    public boolean isFull() {
-        return playerCount > 1;
-    }
-
-    public boolean addPlayer(Users player) {
-        if (isFull()) {
-            return false; // room is full
-        }
-        players[playerCount] = player;
-        playerCount++;
-        return true;
-    }
-
-    public Users[] getPlayers() {
-        return players;
-    }
-
-    public int getPlayerCount() {
-        return playerCount;
-    }
-
-    public void setPlayerCount(int playerCount) {
-        this.playerCount = playerCount;
-        this.isFull = (playerCount == 2);
+        this.lstQuestion = new ArrayList<>();
     }
 
     public int getId() {
         return id;
     }
 
-    public void setId(int id) {
-        this.id = id;
+    public Users getUser1() {
+        return user1;
     }
 
+    public Users getUser2() {
+        return user2;
+    }
+
+    public void setUser1(Users user1) {
+        this.user1 = user1;
+    }
+
+    public void setUser2(Users user2) {
+        this.user2 = user2;
+    }
+
+    public List<Questions> getLstQuestion() {
+        return lstQuestion;
+    }
+
+    public void setLstQuestion(List<Questions> lstQuestion) {
+        this.lstQuestion = lstQuestion;
+    }
+
+    public int getQty() {
+        int quantity = 0;
+        quantity = this.user1 != null ? ++quantity : quantity;
+        quantity = this.user2 != null ? ++quantity : quantity;
+        return quantity;
+    }
+
+    public void setUser(Users user) {
+        if(this.user1 == null) {
+            this.user1 = user;
+        }else if(this.user2 == null) {
+            this.user2 = user;
+        }
+    }
 }

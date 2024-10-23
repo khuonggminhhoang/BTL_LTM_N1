@@ -5,4 +5,5 @@ public class Config {
     public static final String JDBC_USER = "root";
     public static final String JDBC_PASSWORD = "PTITptit2021@";
     public static final int PORT = 9854;
+    public static final int numberOfRoom = 8;
 }

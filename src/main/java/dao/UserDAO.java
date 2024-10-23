@@ -96,5 +96,7 @@ public class UserDAO extends DAO {
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
+
+
     }
 }

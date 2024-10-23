@@ -20,6 +20,12 @@ public class Users implements Serializable {
         this.password = password;
     }
 
+    public Users(String username, String password, String avatar) {
+        this.username = username;
+        this.password = password;
+        this.avatar = avatar;
+    }
+
     public Users(int id ,String username, String password, int numberOfGame, int numberOfWin, int numberOfDraw, boolean isOnline, boolean isPlaying, String avatar) {
         this.id = id;
         this.username = username;
