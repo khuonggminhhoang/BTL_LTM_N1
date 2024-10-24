@@ -5,6 +5,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.*;
 
 import system.Config;
 import view.DashboardFrm;
@@ -13,7 +14,10 @@ public class Server {
     public static ThreadBus threadBus;
     public static List<RoomController> lstRoomController;
 
+
     public static void main(String[] args) {
+        ServerSocket serverSocket = null;
+
         try {
             threadBus = new ThreadBus();
             lstRoomController = new ArrayList<>(Config.numberOfRoom);
@@ -24,9 +28,18 @@ public class Server {
                 lstRoomController.add(room);
             }
 
-            ServerSocket serverSocket = new ServerSocket(Config.PORT);
+            serverSocket = new ServerSocket(Config.PORT);
             System.out.println("Server listenning on port " + Config.PORT);
             DashboardFrm dashboardFrm = new DashboardFrm();
+
+            ThreadPoolExecutor executor = new ThreadPoolExecutor(
+                    10,
+                    100,
+                    10,
+                    TimeUnit.SECONDS,
+                    new ArrayBlockingQueue<>(8)
+            );
+
             while (true) {
                 Socket clientSocket = serverSocket.accept();
                 int idClientSocket = threadBus.getSize();
@@ -39,11 +52,18 @@ public class Server {
                 SocketHandle socketHandle = new SocketHandle(idClientSocket,clientSocket);
                 threadBus.addSocketHandle(socketHandle);
                 System.out.println(threadBus.getSize() + "luồng đang chạy");
-                socketHandle.run();
+                executor.execute(socketHandle);
             }
 
         } catch (IOException e) {
             throw new RuntimeException(e);
+        }
+        finally {
+            try {
+                serverSocket.close();
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
         }
     }
 }

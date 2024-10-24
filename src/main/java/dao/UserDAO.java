@@ -96,7 +96,50 @@ public class UserDAO extends DAO {
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
-
-
     }
+
+    public boolean updateOnlineUser(Users user, boolean online) {
+        try {
+            String username = user.getUsername();
+            String sql = "UPDATE users SET isOnline=? WHERE username=?";
+            PreparedStatement pstm = this.conn.prepareStatement(sql);
+            pstm.setBoolean(1, online);
+            pstm.setString(2, username);
+
+            int tmp = pstm.executeUpdate();
+            return tmp > 0;
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public boolean updatePlayingUser(Users user, boolean playing) {
+        try {
+            String username = user.getUsername();
+            String sql = "UPDATE users SET isPlaying=? WHERE username=?";
+            PreparedStatement pstm = this.conn.prepareStatement(sql);
+            pstm.setBoolean(1, playing);
+            pstm.setString(2, username);
+
+            int tmp = pstm.executeUpdate();
+            return tmp > 0;
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public boolean increaseNumberOfGame(Users user) {
+        try {
+            String username = user.getUsername();
+            String sql = "UPDATE users SET numberOfGame = numberOfGame + 1 WHERE username = ?";
+            PreparedStatement pstm = this.conn.prepareStatement(sql);
+            pstm.setString(1, username);
+            int tmp = pstm.executeUpdate();
+
+            return tmp > 0;
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
 }

@@ -13,12 +13,8 @@ public class RoomController {
         return id;
     }
 
-    public SocketHandle getClientSocket1() {
-        return clientSocket1;
-    }
-
-    public SocketHandle getClientSocket2() {
-        return clientSocket2;
+    public SocketHandle getCompetitor(int idOwner) {
+        return this.clientSocket1.getId() != idOwner ? this.clientSocket1 : this.clientSocket2;
     }
 
     public boolean setClientSocket(SocketHandle clientSocket) {
@@ -41,8 +37,17 @@ public class RoomController {
         return cnt;
     }
 
-    public void broadCast(String message) {
-        this.clientSocket1.sendMessage(message);
-        this.clientSocket2.sendMessage(message);
+    public void broadCast(SocketHandle socketHandle,String message) {
+        if(this.clientSocket1 != socketHandle) {
+            this.clientSocket1.sendMessage(message);
+        }
+        else {
+            this.clientSocket2.sendMessage(message);
+        }
+    }
+
+    public void removeSocketHandle(SocketHandle socketHandle) {
+        this.clientSocket1 = this.clientSocket1 == socketHandle ? null : this.clientSocket1;
+        this.clientSocket2 = this.clientSocket2 == socketHandle ? null : this.clientSocket2;
     }
 }
