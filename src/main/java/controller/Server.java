@@ -6,23 +6,22 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
 
-import model.Room;
 import system.Config;
 import view.DashboardFrm;
 
 public class Server {
     public static ThreadBus threadBus;
-    public static List<Room> lstRoom;
+    public static List<RoomController> lstRoomController;
 
     public static void main(String[] args) {
         try {
             threadBus = new ThreadBus();
-            lstRoom = new ArrayList<>(Config.numberOfRoom);
+            lstRoomController = new ArrayList<>(Config.numberOfRoom);
 
             // fix 6 phong
             for(int i=0; i<Config.numberOfRoom; ++i) {
-                Room room = new Room(i + 101);
-                lstRoom.add(room);
+                RoomController room = new RoomController(i + 101);
+                lstRoomController.add(room);
             }
 
             ServerSocket serverSocket = new ServerSocket(Config.PORT);

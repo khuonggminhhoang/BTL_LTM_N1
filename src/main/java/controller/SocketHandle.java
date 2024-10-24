@@ -3,7 +3,6 @@ package controller;
 import dao.QuestionDAO;
 import dao.UserDAO;
 import model.Message;
-import model.Room;
 import model.Users;
 
 import java.io.*;
@@ -17,15 +16,36 @@ public class SocketHandle implements Runnable{
     private ObjectOutputStream oos;
     private Users user;
 
-    public SocketHandle(int id,Socket clientSocket) {
+    public SocketHandle(int id,Socket clientSocket) throws IOException {
         this.clientSocket = clientSocket;
+        this.oos = new ObjectOutputStream(clientSocket.getOutputStream());
+        this.ois = new ObjectInputStream(clientSocket.getInputStream());
     }
 
     public void closeSocket() {
         try {
-            this.ois.close();
-            this.oos.close();
-            this.clientSocket.close();
+            if (this.ois != null) this.ois.close();
+            if (this.oos != null) this.oos.close();
+            if (this.clientSocket != null) this.clientSocket.close();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void sendMessage(String message) {
+        try {
+            Message messageObj = new Message("CHAT_RESPONSE", message);
+            this.oos.writeObject(messageObj);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    // gửi dữ liệu sang client
+    public void write(String type, Object object) {
+        try {
+            Message sendMessage = new Message(type, object);
+            this.oos.writeObject(sendMessage);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -36,8 +56,6 @@ public class SocketHandle implements Runnable{
         try {
             QuestionDAO questionDAO = new QuestionDAO();
             UserDAO userDao = new UserDAO();
-            this.ois = new ObjectInputStream(this.clientSocket.getInputStream());
-            this.oos = new ObjectOutputStream(this.clientSocket.getOutputStream());
             System.out.println("new thread started with id: " + this.clientSocket);
 
             // nhận dữ liệu từ client
@@ -50,12 +68,10 @@ public class SocketHandle implements Runnable{
                     if(userDao.verifyUser(user) != null) {
                         this.user = userDao.verifyUser(user);
                         // gửi dữ liệu sang client
-                        Message sendMessage = new Message("LOGIN_SUCCESS", this.user);
-                        this.oos.writeObject(sendMessage);
+                        this.write("LOGIN_SUCCESS", this.user);
                     }
                     else {
-                        Message sendMessage = new Message("LOGIN_FAIL", "Sai tên tài khoản hoặc mật khẩu");
-                        this.oos.writeObject(sendMessage);
+                        this.write("LOGIN_FAIL", "Sai tên tài khoản hoặc mật khẩu");
                     }
                     break;
                 }
@@ -63,12 +79,10 @@ public class SocketHandle implements Runnable{
                     Users user = (Users) receiveMessage.getObject();
                     boolean isRegisted = userDao.register(user);
                     if(isRegisted) {
-                        Message sendMessage = new Message("REGISTER_SUCCESS", "Đăng ký tài khoản thành công");
-                        this.oos.writeObject(sendMessage);
+                        this.write("REGISTER_SUCCESS", "Đăng ký tài khoản thành công");
                     }
                     else {
-                        Message sendMessage = new Message("REGISTER_FAIL", "Tên tài khoản đã tồn tại");
-                        this.oos.writeObject(sendMessage);
+                        this.write("REGISTER_FAIL", "Tên tài khoản đã tồn tại");
                     }
                     break;
                 }
@@ -77,48 +91,42 @@ public class SocketHandle implements Runnable{
                     System.out.println(user.getUsername());
                     boolean isChanged = userDao.changePassword(user);
                     if(isChanged) {
-                        Message sendMessage = new Message("CHANGE_PASSWORD_SUCCESS", "Thay đổi mật khẩu thành công");
-                        this.oos.writeObject(sendMessage);
+                        this.write("CHANGE_PASSWORD_SUCCESS", "Thay đổi mật khẩu thành công");
                     }
                     else {
-                        Message sendMessage = new Message("CHANGE_PASSWORD_FAIL", "Tên tài khoản không tồn tại hoặc mật khẩu mới bị trùng");
-                        this.oos.writeObject(sendMessage);
+                        this.write("CHANGE_PASSWORD_FAIL", "Tên tài khoản không tồn tại hoặc mật khẩu mới bị trùng");
                     }
 
                     break;
                 }
 
                 case "GET_ROOMS_REQUEST": {
-                    Message sendMessage = new Message("GET_ROOMS_SUCCESS", Server.lstRoom);
-                    this.oos.writeObject(sendMessage);
+                    HashMap<Integer, Integer> mapRoom = new HashMap<>();
+                    for(RoomController roomController : Server.lstRoomController) {
+                        mapRoom.put(roomController.getId(), roomController.getQuantity());
+                    }
+                    this.write("GET_ROOMS_SUCCESS", mapRoom);
                     break;
                 }
 
+                // type: JOIN_ROOM_REQUEST | object: idRoom
                 case "JOIN_ROOM_REQUEST": {
-                    HashMap<Integer, Users> map = (HashMap<Integer, Users>) receiveMessage.getObject();
-                    int idRoom = (Integer) map.keySet().toArray()[0];
-                    Users user = map.get(idRoom);
-
-
-                    for(Room room : Server.lstRoom) {
-                        if(room.getId() == idRoom) {
-                            if(room.getQty() >= 2) {
-                                Message sendMessage = new Message("JOIN_ROOM_FAIL", null);
-                                this.oos.writeObject(sendMessage);
-                                break;
+                    int idRoom = Integer.parseInt(receiveMessage.getObject() + "");
+                    for(RoomController roomController : Server.lstRoomController) {
+                        if(roomController.getId() == idRoom) {
+                            boolean flag = roomController.setClientSocket(this);
+                            if(!flag) {
+                                this.write("JOIN_ROOM_FAIL", "Phòng full");
                             }
-                            room.setUser(user);
-                            room.setLstQuestion(questionDAO.getThreeQuestion());
-                            Message sendMessage = new Message("JOIN_ROOM_SUCCESS", room);
-                            this.oos.writeObject(sendMessage);
+                            this.write("JOIN_ROOM_SUCCESS", "Join phòng thành công");
                             break;
                         }
                     }
 
-
-
                     break;
                 }
+
+
 
 
             }
