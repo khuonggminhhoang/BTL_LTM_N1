@@ -7,14 +7,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.*;
 
-import model.Room;
 import system.Config;
 import view.DashboardFrm;
 
 public class Server {
     public static ThreadBus threadBus;
     public static List<RoomController> lstRoomController;
-    public static List<Room> lstRoom;
 
 
     public static void main(String[] args) {

@@ -3,7 +3,7 @@ package controller;
 import dao.QuestionDAO;
 import dao.UserDAO;
 import model.Message;
-import model.Room;
+import model.Questions;
 import model.Users;
 
 import java.io.*;
@@ -137,41 +137,65 @@ public class SocketHandle implements Runnable{
 
                         break;
                     }
-
-                case "SEND_ANSWER": { //thang kia cung se nhan
-                    String userAnswer = (String) receiveMessage.getObject();
-
-                    // Tìm phòng hiện tại của người chơi
-                    RoomController currentRoom = findRoomByUser(this);
-
-                    if (currentRoom != null) {
-                        // Lấy câu hỏi hiện tại và đáp án đúng của phòng
-                        String correctAnswer = currentRoom.getCurrentQuestion().getAnswer();
-                        // nếu người chơi hết thời gian trả lời client gửi một message với object là null
-                        if (userAnswer.equalsIgnoreCase(correctAnswer)) {
-                            // Cập nhật điểm và chuyển sang câu hỏi mới || Nếu đúng thì bên client sẽ cập nhật bên server không cần cập nhật
-//                            currentRoom.updateScore(this.user);
-
-                            // Kiểm tra xem đã hết câu hỏi chưa
-                            if (currentRoom.hasNextQuestion()) {
-                                currentRoom.moveToNextQuestion();
-                                Message sendMessage = new Message("ANSWER_CORRECT", currentRoom.getCurrentQuestion());
-                                this.oos.writeObject(sendMessage);
-                            } else {
-                                // Kết thúc trò chơi khi hết câu hỏi
-                                Message endMessage = new Message("GAME_OVER", "Trò chơi kết thúc");
-                                this.oos.writeObject(endMessage);
-                            }
-                        } else {
-                            // Trả lời sai
-                            Message sendMessage = new Message("ANSWER_INCORRECT", "Đáp án không đúng.");
-                            this.oos.writeObject(sendMessage);
+                    case "START_GAME": {
+                        // Tìm RoomController chứa người chơi hiện tại
+                        RoomController currentRoom = findRoomByUser(this);
+                        if (currentRoom == null) {
+                            System.out.println("Không tìm thấy phòng cho người chơi.");
+                            break;
                         }
+
+                        // Lấy câu hỏi hiện tại
+                        Questions currentQuestion = currentRoom.getCurrentQuestion();
+                        if (currentQuestion == null) {
+                            System.out.println("Không có câu hỏi nào để bắt đầu trò chơi.");
+                            break;
+                        }
+
+                        // Tạo một Message để gửi câu hỏi
+                        Message questionMessage = new Message("QUESTION", currentQuestion);
+                        this.oos.writeObject((questionMessage));
+
+                        System.out.println("Đã gửi câu hỏi đầu tiên cho người chơi trong phòng.");
+                        break;
                     }
-                    break;
-                }
 
+                    case "SEND_ANSWER": { //thang kia cung se nhan
+                        String userAnswer = (String) receiveMessage.getObject();
 
+                        // Tìm phòng hiện tại của người chơi
+                        RoomController currentRoom = findRoomByUser(this);
+                        currentRoom.broadCast(this, userAnswer);
+                        if (currentRoom != null) {
+                            // Lấy câu hỏi hiện tại và đáp án đúng của phòng
+                            String correctAnswer = currentRoom.getCurrentQuestion().getAnswer();
+                            // nếu người chơi hết thời gian trả lời client gửi một message với object là null
+                            if (userAnswer.equalsIgnoreCase(correctAnswer)) {
+                                // Cập nhật điểm và chuyển sang câu hỏi mới || Nếu đúng thì bên client sẽ cập nhật bên server không cần cập nhật
+    //                            currentRoom.updateScore(this.user);
+
+                                // Kiểm tra xem đã hết câu hỏi chưa
+                                if (currentRoom.hasNextQuestion()) {
+                                    currentRoom.moveToNextQuestion();
+                                    Message sendMessage = new Message("ANSWER_CORRECT", currentRoom.getCurrentQuestion());
+                                    this.oos.writeObject(sendMessage);
+                                } else {
+                                    // Kết thúc trò chơi khi hết câu hỏi
+                                    Message endMessage = new Message("GAME_OVER", "Trò chơi kết thúc");
+                                    this.oos.writeObject(endMessage);
+                                }
+                            } else {
+                                // Trả lời sai
+                                Message sendMessage = new Message("ANSWER_INCORRECT", "Đáp án không đúng.");
+                                this.oos.writeObject(sendMessage);
+                            }
+                        }
+                        break;
+                    }
+
+                    case "GAME_OVER": {
+                        
+                    }
                 }
             }
 
