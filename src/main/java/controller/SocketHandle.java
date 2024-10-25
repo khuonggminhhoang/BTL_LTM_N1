@@ -16,16 +16,44 @@ public class SocketHandle implements Runnable{
     private ObjectInputStream ois;
     private ObjectOutputStream oos;
     private Users user;
+    private boolean isClosed;
+    private RoomController roomController;
 
-    public SocketHandle(int id,Socket clientSocket) {
+    public SocketHandle(int id,Socket clientSocket) throws IOException {
         this.clientSocket = clientSocket;
+        this.oos = new ObjectOutputStream(clientSocket.getOutputStream());
+        this.ois = new ObjectInputStream(clientSocket.getInputStream());
+        this.isClosed = false;
+    }
+
+    public int getId() {
+        return id;
     }
 
     public void closeSocket() {
         try {
-            this.ois.close();
-            this.oos.close();
-            this.clientSocket.close();
+            if (this.ois != null) this.ois.close();
+            if (this.oos != null) this.oos.close();
+            if (this.clientSocket != null) this.clientSocket.close();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void sendMessage(String message) {
+        try {
+            Message messageObj = new Message("ANSWER_TEMP_RESPONSE", message);
+            this.oos.writeObject(messageObj);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    // gửi dữ liệu sang client
+    public void write(String type, Object object) {
+        try {
+            Message sendMessage = new Message(type, object);
+            this.oos.writeObject(sendMessage);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -33,96 +61,88 @@ public class SocketHandle implements Runnable{
 
     @Override
     public void run() {
+        QuestionDAO questionDAO = new QuestionDAO();
+        UserDAO userDao = new UserDAO();
+        System.out.println("new thread started with id: " + this.clientSocket);
+
         try {
-            QuestionDAO questionDAO = new QuestionDAO();
-            UserDAO userDao = new UserDAO();
-            this.ois = new ObjectInputStream(this.clientSocket.getInputStream());
-            this.oos = new ObjectOutputStream(this.clientSocket.getOutputStream());
-            System.out.println("new thread started with id: " + this.clientSocket);
+            while (!isClosed) {
+                // nhận dữ liệu từ client
+                Message receiveMessage = (Message) this.ois.readObject();
+                String type = receiveMessage.getType();
 
-            // nhận dữ liệu từ client
-            Message receiveMessage = (Message) this.ois.readObject();
-            String type = receiveMessage.getType();
+                switch (type) {
+                    case "LOGIN_REQUEST": {
+                        Users user = (Users) receiveMessage.getObject();
+                        if (userDao.verifyUser(user) != null) {
+                            this.user = userDao.verifyUser(user);
+                            userDao.updateOnlineUser(this.user, true);
+                            // gửi dữ liệu sang client
+                            this.write("LOGIN_SUCCESS", this.user);
+                        } else {
+                            this.write("LOGIN_FAIL", "Sai tên tài khoản hoặc mật khẩu");
+                        }
+                        break;
+                    }
+                    case "REGISTER_REQUEST": {
+                        Users user = (Users) receiveMessage.getObject();
+                        boolean isRegisted = userDao.register(user);
+                        if (isRegisted) {
+                            this.write("REGISTER_SUCCESS", "Đăng ký tài khoản thành công");
+                        } else {
+                            this.write("REGISTER_FAIL", "Tên tài khoản đã tồn tại");
+                        }
+                        break;
+                    }
+                    case "CHANGE_PASSWORD_REQUEST": {
+                        Users user = (Users) receiveMessage.getObject();
+                        System.out.println(user.getUsername());
+                        boolean isChanged = userDao.changePassword(user);
+                        if (isChanged) {
+                            this.write("CHANGE_PASSWORD_SUCCESS", "Thay đổi mật khẩu thành công");
+                        } else {
+                            this.write("CHANGE_PASSWORD_FAIL", "Tên tài khoản không tồn tại hoặc mật khẩu mới bị trùng");
+                        }
 
-            switch (type) {
-                case "LOGIN_REQUEST": {
-                    Users user = (Users) receiveMessage.getObject();
-                    if(userDao.verifyUser(user) != null) {
-                        this.user = userDao.verifyUser(user);
-                        // gửi dữ liệu sang client
-                        Message sendMessage = new Message("LOGIN_SUCCESS", this.user);
-                        this.oos.writeObject(sendMessage);
-                    }
-                    else {
-                        Message sendMessage = new Message("LOGIN_FAIL", "Sai tên tài khoản hoặc mật khẩu");
-                        this.oos.writeObject(sendMessage);
-                    }
-                    break;
-                }
-                case "REGISTER_REQUEST": {
-                    Users user = (Users) receiveMessage.getObject();
-                    boolean isRegisted = userDao.register(user);
-                    if(isRegisted) {
-                        Message sendMessage = new Message("REGISTER_SUCCESS", "Đăng ký tài khoản thành công");
-                        this.oos.writeObject(sendMessage);
-                    }
-                    else {
-                        Message sendMessage = new Message("REGISTER_FAIL", "Tên tài khoản đã tồn tại");
-                        this.oos.writeObject(sendMessage);
-                    }
-                    break;
-                }
-                case "CHANGE_PASSWORD_REQUEST": {
-                    Users user = (Users) receiveMessage.getObject();
-                    System.out.println(user.getUsername());
-                    boolean isChanged = userDao.changePassword(user);
-                    if(isChanged) {
-                        Message sendMessage = new Message("CHANGE_PASSWORD_SUCCESS", "Thay đổi mật khẩu thành công");
-                        this.oos.writeObject(sendMessage);
-                    }
-                    else {
-                        Message sendMessage = new Message("CHANGE_PASSWORD_FAIL", "Tên tài khoản không tồn tại hoặc mật khẩu mới bị trùng");
-                        this.oos.writeObject(sendMessage);
+                        break;
                     }
 
-                    break;
-                }
+                    case "GET_ROOMS_REQUEST": {
+                        HashMap<Integer, Integer> mapRoom = new HashMap<>();
+                        for (RoomController roomController : Server.lstRoomController) {
+                            mapRoom.put(roomController.getId(), roomController.getQuantity());
+                        }
+                        this.write("GET_ROOMS_SUCCESS", mapRoom);
+                        break;
+                    }
 
-                case "GET_ROOMS_REQUEST": {
-                    Message sendMessage = new Message("GET_ROOMS_SUCCESS", Server.lstRoom);
-                    this.oos.writeObject(sendMessage);
-                    break;
-                }
-
-                case "JOIN_ROOM_REQUEST": {
-                    HashMap<Integer, Users> map = (HashMap<Integer, Users>) receiveMessage.getObject();
-                    int idRoom = (Integer) map.keySet().toArray()[0];
-                    Users user = map.get(idRoom);
-
-
-                    for(Room room : Server.lstRoom) {
-                        if(room.getId() == idRoom) {
-                            if(room.getQty() >= 2) {
-                                Message sendMessage = new Message("JOIN_ROOM_FAIL", null);
-                                this.oos.writeObject(sendMessage);
+                    // type: JOIN_ROOM_REQUEST | object: idRoom
+                    case "JOIN_ROOM_REQUEST": {
+                        int idRoom = Integer.parseInt(receiveMessage.getObject() + "");
+                        for (RoomController roomController : Server.lstRoomController) {
+                            if (roomController.getId() == idRoom) {
+                                boolean flag = roomController.setClientSocket(this);
+                                if (!flag) {
+                                    this.write("JOIN_ROOM_FAIL", "Phòng full");
+                                    break;
+                                }
+                                userDao.updatePlayingUser(this.user, true);
+                                userDao.increaseNumberOfGame(this.user);
+                                this.write("JOIN_ROOM_SUCCESS", "Join phòng thành công");
+                                this.roomController = roomController;
                                 break;
                             }
-                            room.setUser(user);
-                            room.setLstQuestion(questionDAO.getThreeQuestion());
-                            Message sendMessage = new Message("JOIN_ROOM_SUCCESS", room);
-                            this.oos.writeObject(sendMessage);
-                            break;
                         }
+
+
+                        break;
                     }
 
-                    break;
-                }
-
-                case "SEND_ANSWER": {
+                case "SEND_ANSWER": { //thang kia cung se nhan
                     String userAnswer = (String) receiveMessage.getObject();
 
                     // Tìm phòng hiện tại của người chơi
-                    Room currentRoom = findRoomByUser(this.user);
+                    RoomController currentRoom = findRoomByUser(this);
 
                     if (currentRoom != null) {
                         // Lấy câu hỏi hiện tại và đáp án đúng của phòng
@@ -152,19 +172,35 @@ public class SocketHandle implements Runnable{
                 }
 
 
+                }
             }
 
-            // đóng socket
-            this.closeSocket();
+
         } catch (IOException | ClassNotFoundException e) {
-            throw new RuntimeException(e);
+            // đóng socket
+            this.isClosed = true;
+            Server.threadBus.getListSocketHandle().remove(this);
+            System.out.println("1 luồng đã bị xóa");
+
+            // cập nhật trạng thái user thành offline
+            if(this.user != null) {
+                userDao.updateOnlineUser(this.user, false);
+                userDao.updatePlayingUser(this.user, false);
+            }
+
+            // xóa socketHandle khỏi room
+            if(this.roomController != null) {
+                roomController.removeSocketHandle(this);
+                System.out.println(this.roomController.getQuantity());
+            }
+
         }
     }
 
     // Phương thức tìm phòng chứa người dùng
-    private Room findRoomByUser(Users user) {
-        for (Room room : Server.lstRoom) {
-            if (room.containsUser(user)) {
+    private RoomController findRoomByUser(SocketHandle userSocket) {
+        for (RoomController room : Server.lstRoomController) {
+            if (room.containsUser(userSocket)) {
                 return room;
             }
         }
