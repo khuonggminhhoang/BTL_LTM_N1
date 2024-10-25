@@ -5,6 +5,8 @@ import model.Users;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class UserDAO extends DAO {
     public UserDAO() {
@@ -35,7 +37,7 @@ public class UserDAO extends DAO {
             }
         }
         catch( Exception e) {
-            e.printStackTrace();
+            return null;
         }
 
         return null;
@@ -65,7 +67,7 @@ public class UserDAO extends DAO {
             int tmp = pstmz.executeUpdate();
             return tmp > 0;             // đăng ký thành công
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            return false;
         }
     }
 
@@ -94,7 +96,7 @@ public class UserDAO extends DAO {
             return tmp > 0;
 
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            return false;
         }
     }
 
@@ -109,7 +111,7 @@ public class UserDAO extends DAO {
             int tmp = pstm.executeUpdate();
             return tmp > 0;
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            return false;
         }
     }
 
@@ -124,7 +126,7 @@ public class UserDAO extends DAO {
             int tmp = pstm.executeUpdate();
             return tmp > 0;
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            return false;
         }
     }
 
@@ -138,8 +140,66 @@ public class UserDAO extends DAO {
 
             return tmp > 0;
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            return false;
         }
     }
 
+    public List<Users> getAllUser(Users user) {
+        try {
+            List<Users> arr = new ArrayList<>();
+            String username = user.getUsername();
+            String sql = "SELECT * FROM users WHERE username != " + username;
+            PreparedStatement pstm = this.conn.prepareStatement(sql);
+            ResultSet rs = pstm.executeQuery();
+            while (rs.next()) {
+                Users u = new Users(
+                        rs.getInt(1),
+                        rs.getString(2),
+                        rs.getString(3),
+                        rs.getInt(4),
+                        rs.getInt(5),
+                        rs.getInt(6),
+                        rs.getBoolean(7),
+                        rs.getBoolean(8),
+                        rs.getString(9)
+                );
+                arr.add(u);
+            }
+
+            return arr;
+        }
+        catch(SQLException e) {
+            return null;
+        }
+    }
+
+    public List<Users> getListRank() {
+        try {
+         List<Users> arr = new ArrayList<>();
+         String sql = "SELECT * FROM users ORDER BY numberOfWin ASC";
+         PreparedStatement pstm = this.conn.prepareStatement(sql);
+         ResultSet rs = pstm.executeQuery();
+
+        while (rs.next()) {
+            Users u = new Users(
+                rs.getInt(1),
+                rs.getString(2),
+                rs.getString(3),
+                rs.getInt(4),
+                rs.getInt(5),
+                rs.getInt(6),
+                rs.getBoolean(7),
+                rs.getBoolean(8),
+                rs.getString(9)
+            );
+            arr.add(u);
+        }
+
+        return arr;
+
+        }
+        catch(SQLException e) {
+            return null;
+        }
+    }
 }

@@ -3,12 +3,13 @@ package controller;
 import dao.QuestionDAO;
 import dao.UserDAO;
 import model.Message;
-import model.Room;
 import model.Users;
 
 import java.io.*;
 import java.net.Socket;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 public class SocketHandle implements Runnable{
     private int id;
@@ -138,39 +139,60 @@ public class SocketHandle implements Runnable{
                         break;
                     }
 
-                case "SEND_ANSWER": { //thang kia cung se nhan
-                    String userAnswer = (String) receiveMessage.getObject();
+                    case "SEND_ANSWER": { //thang kia cung se nhan
+                        String userAnswer = (String) receiveMessage.getObject();
 
-                    // Tìm phòng hiện tại của người chơi
-                    RoomController currentRoom = findRoomByUser(this);
+                        // Tìm phòng hiện tại của người chơi
+                        RoomController currentRoom = findRoomByUser(this);
 
-                    if (currentRoom != null) {
-                        // Lấy câu hỏi hiện tại và đáp án đúng của phòng
-                        String correctAnswer = currentRoom.getCurrentQuestion().getAnswer();
-                        // nếu người chơi hết thời gian trả lời client gửi một message với object là null
-                        if (userAnswer.equalsIgnoreCase(correctAnswer)) {
-                            // Cập nhật điểm và chuyển sang câu hỏi mới || Nếu đúng thì bên client sẽ cập nhật bên server không cần cập nhật
-//                            currentRoom.updateScore(this.user);
+                        if (currentRoom != null) {
+                            // Lấy câu hỏi hiện tại và đáp án đúng của phòng
+                            String correctAnswer = currentRoom.getCurrentQuestion().getAnswer();
+                            // nếu người chơi hết thời gian trả lời client gửi một message với object là null
+                            if (userAnswer.equalsIgnoreCase(correctAnswer)) {
+                                // Cập nhật điểm và chuyển sang câu hỏi mới || Nếu đúng thì bên client sẽ cập nhật bên server không cần cập nhật
+    //                            currentRoom.updateScore(this.user);
 
-                            // Kiểm tra xem đã hết câu hỏi chưa
-                            if (currentRoom.hasNextQuestion()) {
-                                currentRoom.moveToNextQuestion();
-                                Message sendMessage = new Message("ANSWER_CORRECT", currentRoom.getCurrentQuestion());
-                                this.oos.writeObject(sendMessage);
+                                // Kiểm tra xem đã hết câu hỏi chưa
+                                if (currentRoom.hasNextQuestion()) {
+                                    currentRoom.moveToNextQuestion();
+                                    Message sendMessage = new Message("ANSWER_CORRECT", currentRoom.getCurrentQuestion());
+                                    this.oos.writeObject(sendMessage);
+                                } else {
+                                    // Kết thúc trò chơi khi hết câu hỏi
+                                    Message endMessage = new Message("GAME_OVER", "Trò chơi kết thúc");
+                                    this.oos.writeObject(endMessage);
+                                }
                             } else {
-                                // Kết thúc trò chơi khi hết câu hỏi
-                                Message endMessage = new Message("GAME_OVER", "Trò chơi kết thúc");
-                                this.oos.writeObject(endMessage);
+                                // Trả lời sai
+                                Message sendMessage = new Message("ANSWER_INCORRECT", "Đáp án không đúng.");
+                                this.oos.writeObject(sendMessage);
                             }
-                        } else {
-                            // Trả lời sai
-                            Message sendMessage = new Message("ANSWER_INCORRECT", "Đáp án không đúng.");
-                            this.oos.writeObject(sendMessage);
                         }
+                        break;
                     }
-                    break;
-                }
 
+                    // type: GET_ALL_USER | object: null
+                    case "GET_ALL_USER_REQUEST": {
+                        List<Users> lst = userDao.getAllUser(this.user);
+                        if(lst != null)
+                            this.write( "GET_ALL_USER_SUCCESS", lst);
+                        else
+                            this.write( "GET_ALL_USER_FAIL", false);
+
+                        break;
+                    }
+
+                    // type: VIEW_RANK_REQUEST | object: null
+                    case "VIEW_RANK_REQUEST": {
+                        List<Users> lst = userDao.getListRank();
+                        if(lst != null)
+                            this.write( "VIEW_RANK_SUCCESS", lst);
+                        else
+                            this.write( "VIEW_RANK_FAIL", false);
+
+                        break;
+                    }
 
                 }
             }
