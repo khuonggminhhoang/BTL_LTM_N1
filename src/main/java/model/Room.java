@@ -9,6 +9,7 @@ public class Room implements Serializable {
     private Users user1;
     private Users user2;
     List<Questions> lstQuestion;
+    private int currentQuestionIndex = 0;  // theo dõi câu hỏi hiện tại
 
     public Room() {}
 
@@ -39,10 +40,26 @@ public class Room implements Serializable {
 
     public List<Questions> getLstQuestion() {
         return lstQuestion;
+//        this.currentQuestionIndex = 0;
     }
 
     public void setLstQuestion(List<Questions> lstQuestion) {
         this.lstQuestion = lstQuestion;
+    }
+
+    public Questions getCurrentQuestion() {
+        if (currentQuestionIndex < lstQuestion.size()) {
+            return lstQuestion.get(currentQuestionIndex);
+        }
+        return null; // Trả về null nếu không còn câu hỏi nào
+    }
+
+    public void moveToNextQuestion() {
+        if (currentQuestionIndex < lstQuestion.size() - 1) {
+            currentQuestionIndex++;
+        } else {
+            currentQuestionIndex = -1; // Kết thúc danh sách câu hỏi
+        }
     }
 
     public int getQty() {
@@ -58,5 +75,13 @@ public class Room implements Serializable {
         }else if(this.user2 == null) {
             this.user2 = user;
         }
+    }
+
+    public boolean containsUser(Users user) {
+        return user1.equals(user) || user2.equals(user); // giả sử room có hai người chơi: user1 và user2
+    }
+
+    public boolean hasNextQuestion() {
+        return currentQuestionIndex + 1 < lstQuestion.size();
     }
 }

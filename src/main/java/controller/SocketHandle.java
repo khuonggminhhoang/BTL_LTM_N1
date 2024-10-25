@@ -115,8 +115,39 @@ public class SocketHandle implements Runnable{
                         }
                     }
 
+                    break;
+                }
 
+                case "SEND_ANSWER": {
+                    String userAnswer = (String) receiveMessage.getObject();
 
+                    // Tìm phòng hiện tại của người chơi
+                    Room currentRoom = findRoomByUser(this.user);
+
+                    if (currentRoom != null) {
+                        // Lấy câu hỏi hiện tại và đáp án đúng của phòng
+                        String correctAnswer = currentRoom.getCurrentQuestion().getAnswer();
+                        // nếu người chơi hết thời gian trả lời client gửi một message với object là null
+                        if (userAnswer.equalsIgnoreCase(correctAnswer)) {
+                            // Cập nhật điểm và chuyển sang câu hỏi mới || Nếu đúng thì bên client sẽ cập nhật bên server không cần cập nhật
+//                            currentRoom.updateScore(this.user);
+
+                            // Kiểm tra xem đã hết câu hỏi chưa
+                            if (currentRoom.hasNextQuestion()) {
+                                currentRoom.moveToNextQuestion();
+                                Message sendMessage = new Message("ANSWER_CORRECT", currentRoom.getCurrentQuestion());
+                                this.oos.writeObject(sendMessage);
+                            } else {
+                                // Kết thúc trò chơi khi hết câu hỏi
+                                Message endMessage = new Message("GAME_OVER", "Trò chơi kết thúc");
+                                this.oos.writeObject(endMessage);
+                            }
+                        } else {
+                            // Trả lời sai
+                            Message sendMessage = new Message("ANSWER_INCORRECT", "Đáp án không đúng.");
+                            this.oos.writeObject(sendMessage);
+                        }
+                    }
                     break;
                 }
 
@@ -128,5 +159,15 @@ public class SocketHandle implements Runnable{
         } catch (IOException | ClassNotFoundException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    // Phương thức tìm phòng chứa người dùng
+    private Room findRoomByUser(Users user) {
+        for (Room room : Server.lstRoom) {
+            if (room.containsUser(user)) {
+                return room;
+            }
+        }
+        return null;
     }
 }
