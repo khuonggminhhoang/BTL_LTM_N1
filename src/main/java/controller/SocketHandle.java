@@ -27,6 +27,10 @@ public class SocketHandle implements Runnable{
         this.isClosed = false;
     }
 
+    public Users getUser() {
+        return this.user;
+    }
+
     public int getId() {
         return id;
     }
@@ -191,6 +195,14 @@ public class SocketHandle implements Runnable{
                         else
                             this.write( "VIEW_RANK_FAIL", false);
 
+                        break;
+                    }
+
+                    // type: WORLD_CHAT_REQUEST | object: String
+                    case "WORLD_CHAT_REQUEST": {
+                        String message = (String) receiveMessage.getObject();
+                        Server.threadBus.broadcast(this, message);
+                        System.out.println(message);
                         break;
                     }
 

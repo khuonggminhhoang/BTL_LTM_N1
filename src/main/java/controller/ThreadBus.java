@@ -22,6 +22,11 @@ public class ThreadBus {
         return this.listSocketHandle.size();
     }
 
-
-    //...
+    public void broadcast(SocketHandle socketHandle, String message) {
+        for(SocketHandle socket : this.listSocketHandle) {
+            if(socket != socketHandle) {
+                socket.write("WORLD_CHAT_RESPONSE", message);
+            }
+        }
+    }
 }
