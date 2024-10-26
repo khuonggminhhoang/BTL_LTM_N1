@@ -171,7 +171,7 @@ public class SocketHandle implements Runnable{
 
                         // Tìm phòng hiện tại của người chơi
                         RoomController currentRoom = findRoomByUser(this);
-
+                        currentRoom.broadCast(this, userAnswer);
                         if (currentRoom != null) {
                             // Lấy câu hỏi hiện tại và đáp án đúng của phòng
                             String correctAnswer = currentRoom.getCurrentQuestion().getAnswer();
@@ -198,6 +198,11 @@ public class SocketHandle implements Runnable{
                         }
                         break;
                     }
+
+//                    case "GAME_OVER": {
+//
+//                        break;
+//                    }
 
                     // type: GET_ALL_USER | object: null
                     case "GET_ALL_USER_REQUEST": {
