@@ -3,6 +3,7 @@ package controller;
 import dao.QuestionDAO;
 import dao.UserDAO;
 import model.Message;
+import model.Questions;
 import model.Users;
 
 import java.io.*;
@@ -142,6 +143,28 @@ public class SocketHandle implements Runnable{
 
                         break;
                     }
+                    case "START_GAME": {
+                        // Tìm RoomController chứa người chơi hiện tại
+                        RoomController currentRoom = findRoomByUser(this);
+                        if (currentRoom == null) {
+                            System.out.println("Không tìm thấy phòng cho người chơi.");
+                            break;
+                        }
+
+                        // Lấy câu hỏi hiện tại
+                        Questions currentQuestion = currentRoom.getCurrentQuestion();
+                        if (currentQuestion == null) {
+                            System.out.println("Không có câu hỏi nào để bắt đầu trò chơi.");
+                            break;
+                        }
+
+                        // Tạo một Message để gửi câu hỏi
+                        Message questionMessage = new Message("QUESTION", currentQuestion);
+                        this.oos.writeObject((questionMessage));
+
+                        System.out.println("Đã gửi câu hỏi đầu tiên cho người chơi trong phòng.");
+                        break;
+                    }
 
                     case "SEND_ANSWER": { //thang kia cung se nhan
                         String userAnswer = (String) receiveMessage.getObject();
@@ -206,6 +229,9 @@ public class SocketHandle implements Runnable{
                         break;
                     }
 
+                    case "GAME_OVER": {
+
+                    }
                 }
             }
 
