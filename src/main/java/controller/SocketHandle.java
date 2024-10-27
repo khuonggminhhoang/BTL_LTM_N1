@@ -122,6 +122,14 @@ public class SocketHandle implements Runnable{
                         break;
                     }
 
+                    case "GET_ROOM_REQUEST": {
+//                        SocketHandle client = (SocketHandle) receiveMessage.getObject();
+//                        RoomController currentRoom = findRoomByUser(this);
+                        System.out.println("get room request + " + roomController.getQuantity());
+                        this.write("GET_ROOM_REQUEST", roomController.getQuantity());
+                        break;
+                    }
+
                     // type: JOIN_ROOM_REQUEST | object: idRoom
                     case "JOIN_ROOM_REQUEST": {
                         int idRoom = Integer.parseInt(receiveMessage.getObject() + "");
@@ -136,6 +144,7 @@ public class SocketHandle implements Runnable{
                                 userDao.increaseNumberOfGame(this.user);
                                 this.write("JOIN_ROOM_SUCCESS", "Join phòng thành công");
                                 this.roomController = roomController;
+                                System.out.println(roomController);
                                 break;
                             }
                         }
