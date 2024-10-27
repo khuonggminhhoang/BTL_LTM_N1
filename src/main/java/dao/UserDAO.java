@@ -148,9 +148,11 @@ public class UserDAO extends DAO {
         try {
             List<Users> arr = new ArrayList<>();
             String username = user.getUsername();
-            String sql = "SELECT * FROM users WHERE username != " + username;
+            String sql = "SELECT * FROM users WHERE username != ?";
             PreparedStatement pstm = this.conn.prepareStatement(sql);
+            pstm.setString(1, username);  // Thiết lập giá trị cho dấu chấm hỏi
             ResultSet rs = pstm.executeQuery();
+
             while (rs.next()) {
                 Users u = new Users(
                         rs.getInt(1),
@@ -167,6 +169,7 @@ public class UserDAO extends DAO {
             }
 
             return arr;
+
         }
         catch(SQLException e) {
             return null;
