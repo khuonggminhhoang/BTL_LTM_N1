@@ -130,6 +130,25 @@ public class UserDAO extends DAO {
         }
     }
 
+    public boolean updateUserGameResult(Users user, boolean isWin) {
+        try {
+            String username = user.getUsername();
+            // Câu lệnh SQL để cập nhật kết quả
+            String sql = "UPDATE users SET numberOfGame = numberOfGame + 1 "
+                    + (isWin ? ", numberOfWin = numberOfWin + 1" : "") + " "
+                    + "WHERE username = ?";
+
+            PreparedStatement pstm = this.conn.prepareStatement(sql);
+            pstm.setString(1, username);
+
+            int tmp = pstm.executeUpdate();
+            return tmp > 0; // Trả về true nếu cập nhật thành công
+        } catch (SQLException e) {
+            e.printStackTrace(); // In ra lỗi nếu có
+            return false; // Trả về false nếu có lỗi
+        }
+    }
+
     public boolean increaseNumberOfGame(Users user) {
         try {
             String username = user.getUsername();
@@ -143,6 +162,7 @@ public class UserDAO extends DAO {
             return false;
         }
     }
+
 
     public List<Users> getAllUser(Users user) {
         try {

@@ -211,7 +211,7 @@ public class SocketHandle implements Runnable{
                                     this.oos.writeObject(sendMessage);
                                 } else {
                                     // Kết thúc trò chơi khi hết câu hỏi
-                                    Message endMessage = new Message("GAME_OVER", "Trò chơi kết thúc");
+                                    Message endMessage = new Message("WIN_GAME", "Trò chơi kết thúc");
                                     this.oos.writeObject(endMessage);
                                 }
                             } else {
@@ -223,6 +223,27 @@ public class SocketHandle implements Runnable{
                         break;
                     }
 
+                    case "WIN_GAME": {
+                        Message winMessage = new Message("USER_WIN_GAME", "Thang game");
+                        this.oos.writeObject(winMessage);
+                        break;
+                    }
+
+                    case "OTHER_WIN_GAME": {
+                        Message winMessage = new Message("OTHER_WIN_GAME", "Thang game");
+                        this.oos.writeObject(winMessage);
+                        break;
+                    }
+
+                    case "FINISH_GAME": {
+                        int point =  Integer.parseInt(receiveMessage.getObject() + "");
+                        if (point == 2) {
+                            userDao.updateUserGameResult(user, true);
+                        } else {
+                            userDao.updateUserGameResult(user, false);
+                        }
+                        break;
+                    }
 //                    case "GAME_OVER": {
 //
 //                        break;
