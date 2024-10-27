@@ -49,12 +49,22 @@ public class SocketHandle implements Runnable{
     public void sendMessage(String message) {
         try {
             Message messageObj = new Message("ANSWER_TEMP_RESPONSE", message);
+
             this.oos.writeObject(messageObj);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
 
+    public void sendMessage2() {
+        try {
+            Message messageObj = new Message("OTHER_ANSWER_CORRECT", roomController.getCurrentQuestion());
+
+            this.oos.writeObject(messageObj);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
     // gửi dữ liệu sang client
     public void write(String type, Object object) {
         try {
@@ -70,7 +80,6 @@ public class SocketHandle implements Runnable{
         QuestionDAO questionDAO = new QuestionDAO();
         UserDAO userDao = new UserDAO();
         System.out.println("new thread started with id: " + this.clientSocket);
-
         try {
             while (!isClosed) {
                 // nhận dữ liệu từ client
@@ -144,6 +153,8 @@ public class SocketHandle implements Runnable{
                                 userDao.increaseNumberOfGame(this.user);
                                 this.write("JOIN_ROOM_SUCCESS", "Join phòng thành công");
                                 this.roomController = roomController;
+                                this.roomController.setLstQuestion(questionDAO.getThreeQuestion());
+
                                 System.out.println(roomController);
                                 break;
                             }
@@ -154,18 +165,19 @@ public class SocketHandle implements Runnable{
                     }
                     case "START_GAME": {
                         // Tìm RoomController chứa người chơi hiện tại
-                        RoomController currentRoom = findRoomByUser(this);
-                        if (currentRoom == null) {
+//                        RoomController currentRoom = findRoomByUser(this);
+                        if (roomController == null) {
                             System.out.println("Không tìm thấy phòng cho người chơi.");
                             break;
                         }
 
                         // Lấy câu hỏi hiện tại
-                        Questions currentQuestion = currentRoom.getCurrentQuestion();
+                        Questions currentQuestion = roomController.getCurrentQuestion();
                         if (currentQuestion == null) {
                             System.out.println("Không có câu hỏi nào để bắt đầu trò chơi.");
                             break;
                         }
+                        System.out.println(currentQuestion.getAnswer());
 
                         // Tạo một Message để gửi câu hỏi
                         Message questionMessage = new Message("QUESTION", currentQuestion);
@@ -179,20 +191,23 @@ public class SocketHandle implements Runnable{
                         String userAnswer = (String) receiveMessage.getObject();
 
                         // Tìm phòng hiện tại của người chơi
-                        RoomController currentRoom = findRoomByUser(this);
-                        currentRoom.broadCast(this, userAnswer);
-                        if (currentRoom != null) {
+//                        RoomController currentRoom = findRoomByUser(this);
+                        roomController.broadCast(this, userAnswer);
+                        if (roomController != null) {
                             // Lấy câu hỏi hiện tại và đáp án đúng của phòng
-                            String correctAnswer = currentRoom.getCurrentQuestion().getAnswer();
+                            String correctAnswer = roomController.getCurrentQuestion().getAnswer();
                             // nếu người chơi hết thời gian trả lời client gửi một message với object là null
                             if (userAnswer.equalsIgnoreCase(correctAnswer)) {
                                 // Cập nhật điểm và chuyển sang câu hỏi mới || Nếu đúng thì bên client sẽ cập nhật bên server không cần cập nhật
     //                            currentRoom.updateScore(this.user);
-
+//                                    Message sendMessage = new Message("ANSWER_CORRECT", roomController.getCurrentQuestion());
                                 // Kiểm tra xem đã hết câu hỏi chưa
-                                if (currentRoom.hasNextQuestion()) {
-                                    currentRoom.moveToNextQuestion();
-                                    Message sendMessage = new Message("ANSWER_CORRECT", currentRoom.getCurrentQuestion());
+                                if (roomController.hasNextQuestion()) {
+                                    roomController.moveToNextQuestion();
+                                    Message sendMessage = new Message("ANSWER_CORRECT", roomController.getCurrentQuestion());
+//                                    Message sendMessage2 = new Message("OTHER_ANSWER_CORRECT", roomController.getCurrentQuestion());
+                                    roomController.boardCast2(this);
+
                                     this.oos.writeObject(sendMessage);
                                 } else {
                                     // Kết thúc trò chơi khi hết câu hỏi
