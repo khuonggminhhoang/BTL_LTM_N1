@@ -169,7 +169,6 @@ public class UserDAO extends DAO {
             }
 
             return arr;
-
         }
         catch(SQLException e) {
             return null;
