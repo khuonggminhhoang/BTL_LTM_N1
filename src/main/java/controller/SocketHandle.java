@@ -65,6 +65,17 @@ public class SocketHandle implements Runnable{
             throw new RuntimeException(e);
         }
     }
+
+    public void sendMessage3() {
+        try {
+            Message messageObj = new Message("OTHER_USER", this.user);
+
+            this.oos.writeObject(messageObj);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     // gửi dữ liệu sang client
     public void write(String type, Object object) {
         try {
@@ -132,12 +143,14 @@ public class SocketHandle implements Runnable{
                     }
 
                     case "GET_ROOM_REQUEST": {
-//                        SocketHandle client = (SocketHandle) receiveMessage.getObject();
-//                        RoomController currentRoom = findRoomByUser(this);
                         System.out.println("get room request + " + roomController.getQuantity());
                         this.write("GET_ROOM_REQUEST", roomController.getQuantity());
                         break;
                     }
+
+//                    case "GET_OTHER_USER" : {
+//                        roomController.boardCast3(this);
+//                    }
 
                     // type: JOIN_ROOM_REQUEST | object: idRoom
                     case "JOIN_ROOM_REQUEST": {
@@ -217,6 +230,7 @@ public class SocketHandle implements Runnable{
                             } else {
                                 // Trả lời sai
                                 Message sendMessage = new Message("ANSWER_INCORRECT", "Đáp án không đúng.");
+                                roomController.broadCast(this, userAnswer);
                                 this.oos.writeObject(sendMessage);
                             }
                         }

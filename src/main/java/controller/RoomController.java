@@ -61,6 +61,16 @@ public class RoomController {
             this.clientSocket2.sendMessage2();
         }
     }
+
+    public void boardCast3(SocketHandle socketHandle) {
+        if (this.clientSocket1 != socketHandle) {
+            this.clientSocket1.sendMessage3();
+
+        } else {
+            this.clientSocket2.sendMessage3();
+        }
+    }
+
     public void removeSocketHandle(SocketHandle socketHandle) {
         this.clientSocket1 = this.clientSocket1 == socketHandle ? null : this.clientSocket1;
         this.clientSocket2 = this.clientSocket2 == socketHandle ? null : this.clientSocket2;
@@ -97,4 +107,6 @@ public class RoomController {
             currentQuestionIndex = -1; // Kết thúc danh sách câu hỏi
         }
     }
+
+
 }
