@@ -194,7 +194,10 @@ public class SocketHandle implements Runnable{
 
                         // Tạo một Message để gửi câu hỏi
                         Message questionMessage = new Message("QUESTION", currentQuestion);
-                        this.oos.writeObject((questionMessage));
+                        this.oos.writeObject(questionMessage);
+
+                        Message otherUser = new Message("OTHER_USER", this.roomController.getOpponent(this).getUser());
+                        this.oos.writeObject(otherUser);
 
                         System.out.println("Đã gửi câu hỏi đầu tiên cho người chơi trong phòng.");
                         break;
@@ -203,9 +206,6 @@ public class SocketHandle implements Runnable{
                     case "SEND_ANSWER": { //thang kia cung se nhan
                         String userAnswer = (String) receiveMessage.getObject();
 
-                        // Tìm phòng hiện tại của người chơi
-//                        RoomController currentRoom = findRoomByUser(this);
-                        roomController.broadCast(this, userAnswer);
                         if (roomController != null) {
                             // Lấy câu hỏi hiện tại và đáp án đúng của phòng
                             String correctAnswer = roomController.getCurrentQuestion().getAnswer();
@@ -213,14 +213,12 @@ public class SocketHandle implements Runnable{
                             if (userAnswer.equalsIgnoreCase(correctAnswer)) {
                                 // Cập nhật điểm và chuyển sang câu hỏi mới || Nếu đúng thì bên client sẽ cập nhật bên server không cần cập nhật
     //                            currentRoom.updateScore(this.user);
-//                                    Message sendMessage = new Message("ANSWER_CORRECT", roomController.getCurrentQuestion());
                                 // Kiểm tra xem đã hết câu hỏi chưa
                                 if (roomController.hasNextQuestion()) {
                                     roomController.moveToNextQuestion();
                                     Message sendMessage = new Message("ANSWER_CORRECT", roomController.getCurrentQuestion());
-//                                    Message sendMessage2 = new Message("OTHER_ANSWER_CORRECT", roomController.getCurrentQuestion());
                                     roomController.boardCast2(this);
-
+                                    roomController.broadCast(this, userAnswer);
                                     this.oos.writeObject(sendMessage);
                                 } else {
                                     // Kết thúc trò chơi khi hết câu hỏi
@@ -231,7 +229,7 @@ public class SocketHandle implements Runnable{
                                 // Trả lời sai
                                 Message sendMessage = new Message("ANSWER_INCORRECT", "Đáp án không đúng.");
                                 roomController.broadCast(this, userAnswer);
-                                this.oos.writeObject(sendMessage);
+//                                this.oos.writeObject(sendMessage);
                             }
                         }
                         break;
@@ -258,6 +256,7 @@ public class SocketHandle implements Runnable{
                         }
                         break;
                     }
+
 //                    case "GAME_OVER": {
 //
 //                        break;

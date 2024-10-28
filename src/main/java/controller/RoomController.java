@@ -108,5 +108,8 @@ public class RoomController {
         }
     }
 
-
+    public SocketHandle getOpponent(SocketHandle socketHandle) {
+        if(clientSocket1 != socketHandle) return clientSocket1;
+        else return clientSocket2;
+    }
 }
