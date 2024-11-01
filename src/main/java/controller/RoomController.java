@@ -54,6 +54,7 @@ public class RoomController {
     }
 
     public void boardCast2(SocketHandle socketHandle) {
+        System.out.println("send broad cast 2");
         if (this.clientSocket1 != socketHandle) {
             this.clientSocket1.sendMessage2();
 

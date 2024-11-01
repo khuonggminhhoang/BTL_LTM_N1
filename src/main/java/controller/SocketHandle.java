@@ -216,36 +216,40 @@ public class SocketHandle implements Runnable{
                                 // Kiểm tra xem đã hết câu hỏi chưa
                                 if (roomController.hasNextQuestion()) {
                                     roomController.moveToNextQuestion();
-                                    Message sendMessage = new Message("ANSWER_CORRECT", roomController.getCurrentQuestion());
-                                    roomController.boardCast2(this);
-                                    roomController.broadCast(this, userAnswer);
-                                    this.oos.writeObject(sendMessage);
-                                } else {
-                                    // Kết thúc trò chơi khi hết câu hỏi
-                                    Message endMessage = new Message("WIN_GAME", "Trò chơi kết thúc");
-                                    this.oos.writeObject(endMessage);
+                                    System.out.println("tăng câu hỏi");
                                 }
+                                Message sendMessage = new Message("ANSWER_CORRECT", roomController.getCurrentQuestion());
+                                roomController.broadCast(this, userAnswer);
+                                roomController.boardCast2(this);
+                                this.oos.writeObject(sendMessage);
+//                                else {
+//                                    // Kết thúc trò chơi khi hết câu hỏi
+//                                    Message endMessage = new Message("WIN_GAME", "Trò chơi kết thúc");
+//                                    roomController.broadCast(this, userAnswer);
+//                                    roomController.boardCast2(this);
+//                                    this.oos.writeObject(endMessage);
+//                                }
                             } else {
                                 // Trả lời sai
                                 Message sendMessage = new Message("ANSWER_INCORRECT", "Đáp án không đúng.");
                                 roomController.broadCast(this, userAnswer);
-//                                this.oos.writeObject(sendMessage);
+                                this.oos.writeObject(sendMessage);
                             }
                         }
                         break;
                     }
 
-                    case "WIN_GAME": {
-                        Message winMessage = new Message("USER_WIN_GAME", "Thang game");
-                        this.oos.writeObject(winMessage);
-                        break;
-                    }
-
-                    case "OTHER_WIN_GAME": {
-                        Message winMessage = new Message("OTHER_WIN_GAME", "Thang game");
-                        this.oos.writeObject(winMessage);
-                        break;
-                    }
+//                    case "WIN_GAME": {
+//                        Message winMessage = new Message("USER_WIN_GAME", "Thang game");
+//                        this.oos.writeObject(winMessage);
+//                        break;
+//                    }
+//
+//                    case "OTHER_WIN_GAME": {
+//                        Message winMessage = new Message("OTHER_WIN_GAME", "Thang game");
+//                        this.oos.writeObject(winMessage);
+//                        break;
+//                    }
 
                     case "FINISH_GAME": {
                         int point =  Integer.parseInt(receiveMessage.getObject() + "");
