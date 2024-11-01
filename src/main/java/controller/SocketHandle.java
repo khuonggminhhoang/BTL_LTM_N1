@@ -1,7 +1,9 @@
 package controller;
 
+import dao.HistoryDAO;
 import dao.QuestionDAO;
 import dao.UserDAO;
+import model.Histories;
 import model.Message;
 import model.Questions;
 import model.Users;
@@ -90,6 +92,7 @@ public class SocketHandle implements Runnable{
     public void run() {
         QuestionDAO questionDAO = new QuestionDAO();
         UserDAO userDao = new UserDAO();
+        HistoryDAO historyDAO = new HistoryDAO();
         System.out.println("new thread started with id: " + this.clientSocket);
         try {
             while (!isClosed) {
@@ -163,7 +166,6 @@ public class SocketHandle implements Runnable{
                                     break;
                                 }
                                 userDao.updatePlayingUser(this.user, true);
-                                userDao.increaseNumberOfGame(this.user);
                                 this.write("JOIN_ROOM_SUCCESS", "Join phòng thành công");
                                 this.roomController = roomController;
                                 this.roomController.setLstQuestion(questionDAO.getThreeQuestion());
@@ -251,9 +253,9 @@ public class SocketHandle implements Runnable{
 //                        break;
 //                    }
 
-                    case "FINISH_GAME": {
-                        int point =  Integer.parseInt(receiveMessage.getObject() + "");
-                        if (point == 2) {
+                    case "UPDATE_USER_REQUEST": {
+                        String resultGame = (String) receiveMessage.getObject();
+                        if (resultGame.equals("win")) {
                             userDao.updateUserGameResult(user, true);
                         } else {
                             userDao.updateUserGameResult(user, false);
@@ -296,8 +298,14 @@ public class SocketHandle implements Runnable{
                         break;
                     }
 
-                    case "GAME_OVER": {
+                    case "GET_HISTORY_REQUEST": {
+                        List<Histories> lst = historyDAO.getAllHistory(this.user);
+                        if(lst != null)
+                            this.write( "GET_HISTORY_SUCCESS", lst);
+                        else
+                            this.write( "GET_HISTORY_FAIL", false);
 
+                        break;
                     }
                 }
             }
