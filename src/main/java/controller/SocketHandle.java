@@ -307,6 +307,18 @@ public class SocketHandle implements Runnable{
 
                         break;
                     }
+
+                    case "ADD_HISTORY_REQUEST": {
+                        Histories history = (Histories) receiveMessage.getObject();
+
+                        boolean check = historyDAO.addHistory(history);
+                        if(check) {
+                            this.write("ADD_HISTORY_RESPONSE", true);
+                        }
+                        else {
+                            this.write("ADD_HISTORY_FAIL", false);
+                        }
+                    }
                 }
             }
 
