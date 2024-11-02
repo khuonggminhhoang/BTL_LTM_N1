@@ -289,18 +289,6 @@ public class SocketHandle implements Runnable{
                         break;
                     }
 
-//                    case "WIN_GAME": {
-//                        Message winMessage = new Message("USER_WIN_GAME", "Thang game");
-//                        this.oos.writeObject(winMessage);
-//                        break;
-//                    }
-//
-//                    case "OTHER_WIN_GAME": {
-//                        Message winMessage = new Message("OTHER_WIN_GAME", "Thang game");
-//                        this.oos.writeObject(winMessage);
-//                        break;
-//                    }
-
                     case "UPDATE_USER_REQUEST": {
                         String resultGame = (String) receiveMessage.getObject();
                         if (resultGame.equals("win")) {
@@ -311,10 +299,25 @@ public class SocketHandle implements Runnable{
                         break;
                     }
 
-//                    case "GAME_OVER": {
-//
-//                        break;
-//                    }
+                    case "UPDATE_HISTORY_REQUEST": {
+                        Histories history = (Histories) receiveMessage.getObject();
+
+                        int ownerId = this.user.getId();
+                        int opponentId = this.roomController.getOpponent(this).user.getId();
+
+                        history.setOwnerId(ownerId);
+                        history.setOpponentId(opponentId);
+
+                        boolean check = historyDAO.addHistory(history);
+                        if(check) {
+                            System.out.println("Cập nhật lịch sử thành công");
+                        }
+                        else {
+                            System.out.println("Cập nhật thất bại");
+                        }
+                        break;
+                    }
+
 
                     // type: GET_ALL_USER | object: null
                     case "GET_ALL_USER_REQUEST": {
@@ -364,6 +367,12 @@ public class SocketHandle implements Runnable{
                             userDao.updateUserGameResult(user, false);
                         }
                         roomController.removeSocketHandle(this);
+                        break;
+                    }
+
+                    // xóa người chơi khi hủy ghép đấu khỏi phòng
+                    case "REMOVE_SOCKET_REQUEST": {
+                        this.roomController.removeSocketHandle(this);
                         break;
                     }
                 }

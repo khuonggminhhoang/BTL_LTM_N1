@@ -12,9 +12,6 @@ public class RoomController {
     List<Questions> lstQuestion;
     private int currentQuestionIndex = 0;
 
-
-
-
     private int numTimeout = 0;
 
     public void increaseNumTimeout() {

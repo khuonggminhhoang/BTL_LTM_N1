@@ -22,6 +22,14 @@ public class Histories implements Serializable {
         this.ownerId = ownerId;
     }
 
+    public Histories(LocalDateTime timeStart, LocalDateTime timeEnd, boolean isWin, int opponentId, int ownerId) {
+        this.timeStart = timeStart;
+        this.timeEnd = timeEnd;
+        this.isWin = isWin;
+        this.opponentId = opponentId;
+        this.ownerId = ownerId;
+    }
+
     public int getId() {
         return id;
     }
