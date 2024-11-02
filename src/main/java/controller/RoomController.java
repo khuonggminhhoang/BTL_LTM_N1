@@ -12,6 +12,23 @@ public class RoomController {
     List<Questions> lstQuestion;
     private int currentQuestionIndex = 0;
 
+
+
+
+    private int numTimeout = 0;
+
+    public void increaseNumTimeout() {
+        numTimeout++;
+    }
+
+    public int getNumTimeout() {
+        return numTimeout;
+    }
+
+    public void setNumTimeout(int numTimeout) {
+        this.numTimeout = numTimeout;
+    }
+
     public RoomController(int id) {
         this.id = id;
     }
@@ -71,7 +88,23 @@ public class RoomController {
             this.clientSocket2.sendMessage3();
         }
     }
+    public void boardCast4(SocketHandle socketHandle) {
+        if (this.clientSocket1 != socketHandle) {
+            this.clientSocket1.sendMessage4();
 
+        } else {
+            this.clientSocket2.sendMessage4();
+        }
+    }
+
+    public void boardCast5(SocketHandle socketHandle) {
+        if (this.clientSocket1 != socketHandle) {
+            this.clientSocket1.sendMessage5();
+
+        } else {
+            this.clientSocket2.sendMessage5();
+        }
+    }
     public void removeSocketHandle(SocketHandle socketHandle) {
         this.clientSocket1 = this.clientSocket1 == socketHandle ? null : this.clientSocket1;
         this.clientSocket2 = this.clientSocket2 == socketHandle ? null : this.clientSocket2;

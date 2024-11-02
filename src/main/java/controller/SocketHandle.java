@@ -23,6 +23,8 @@ public class SocketHandle implements Runnable{
     private boolean isClosed;
     private RoomController roomController;
 
+//    private int numTimeout = 0;
+
     public SocketHandle(int id,Socket clientSocket) throws IOException {
         this.clientSocket = clientSocket;
         this.oos = new ObjectOutputStream(clientSocket.getOutputStream());
@@ -71,6 +73,26 @@ public class SocketHandle implements Runnable{
     public void sendMessage3() {
         try {
             Message messageObj = new Message("OTHER_USER", this.user);
+
+            this.oos.writeObject(messageObj);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void sendMessage4() {
+        try {
+            Message messageObj = new Message("TIMEOUT", roomController.getCurrentQuestion());
+
+            this.oos.writeObject(messageObj);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void sendMessage5() {
+        try {
+            Message messageObj = new Message("FINISH_GAME", "");
 
             this.oos.writeObject(messageObj);
         } catch (IOException e) {
@@ -232,6 +254,32 @@ public class SocketHandle implements Runnable{
 //                                    this.oos.writeObject(endMessage);
 //                                }
                             } else {
+                                if (userAnswer.equalsIgnoreCase("TIMEOUT!!!")) {
+                                    System.out.println("Timeout");
+                                    System.out.println(roomController.getNumTimeout());
+                                    roomController.increaseNumTimeout();
+                                    if (roomController.getNumTimeout() == 2) {
+                                        System.out.println("num timeout = 2");
+                                        roomController.setNumTimeout(0);
+                                        
+                                        if (roomController.hasNextQuestion()) {
+                                            roomController.moveToNextQuestion();
+                                            Message sendMessage = new Message("TIMEOUT", roomController.getCurrentQuestion());
+                                            this.oos.writeObject(sendMessage);
+                                            System.out.println("tăng câu hỏi");
+                                            roomController.boardCast4(this);
+                                            System.out.println("move to next question and boardcast 4");
+                                            continue;
+                                        } else {
+                                            Message finishGameMessage = new Message("FINISH_GAME", "");
+                                            this.oos.writeObject(finishGameMessage);
+                                            roomController.boardCast5(this);
+                                            System.out.println("boardcast5 to finish game");
+                                        }
+                                    }
+                                    continue;
+                                }
+                                System.out.println(correctAnswer);
                                 // Trả lời sai
                                 Message sendMessage = new Message("ANSWER_INCORRECT", "Đáp án không đúng.");
                                 roomController.broadCast(this, userAnswer);
