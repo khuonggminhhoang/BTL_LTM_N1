@@ -308,16 +308,15 @@ public class SocketHandle implements Runnable{
                         break;
                     }
 
-                    case "ADD_HISTORY_REQUEST": {
-                        Histories history = (Histories) receiveMessage.getObject();
-
-                        boolean check = historyDAO.addHistory(history);
-                        if(check) {
-                            this.write("ADD_HISTORY_RESPONSE", true);
+                    case "FINISH_GAME": {
+                        int point =  Integer.parseInt(receiveMessage.getObject() + "");
+                        if (point == 2) {
+                            userDao.updateUserGameResult(user, true);
+                        } else {
+                            userDao.updateUserGameResult(user, false);
                         }
-                        else {
-                            this.write("ADD_HISTORY_FAIL", false);
-                        }
+                        roomController.removeSocketHandle(this);
+                        break;
                     }
                 }
             }

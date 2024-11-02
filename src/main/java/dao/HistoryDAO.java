@@ -6,8 +6,6 @@ import model.Users;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Timestamp;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -42,23 +40,6 @@ public class HistoryDAO extends DAO{
         }
         catch(SQLException e) {
             return null;
-        }
-    }
-
-    public boolean addHistory(Histories histories) {
-        try {
-            String sqlz = "INSERT INTO histories(timeStart, timeEnd, isWin, opponentId, ownerId) values (?, ?, ?, ?, ?)";
-            PreparedStatement pstmz = this.conn.prepareStatement(sqlz);
-            pstmz.setTimestamp(1, Timestamp.valueOf(histories.getTimeStart()));
-            pstmz.setTimestamp(2, Timestamp.valueOf(histories.getTimeEnd()));
-            pstmz.setBoolean(3, histories.isWin());
-            pstmz.setInt(4, histories.getOpponentId());
-            pstmz.setInt(5, histories.getOwnerId());
-
-            int tmp = pstmz.executeUpdate();
-            return tmp > 0;             // thành công
-        } catch (SQLException e) {
-            return false;
         }
     }
 }
