@@ -20,18 +20,16 @@ public class HistoryDAO extends DAO{
         try {
             List<Histories> arr = new ArrayList<>();
             int ownerId = user.getId();
-            String sql = "SELECT * FROM histories WHERE ownerId != ?";
+            String sql = "SELECT * FROM histories WHERE ownerId = ?";
             PreparedStatement pstm = this.conn.prepareStatement(sql);
             pstm.setInt(1, ownerId);  // Thiết lập giá trị cho dấu chấm hỏi
             ResultSet rs = pstm.executeQuery();
 
             UserDAO userDAO = new UserDAO();
 
-
-
             while (rs.next()) {
-                Users owner = userDAO.getOne(rs.getInt(5));
-                Users opponent = userDAO.getOne(rs.getInt(6));
+                Users opponent = userDAO.getOne(rs.getInt(5));
+                Users owner = userDAO.getOne(rs.getInt(6));
 
                 Histories hst = new Histories(
                         rs.getInt(1),
