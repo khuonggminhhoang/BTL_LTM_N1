@@ -173,10 +173,6 @@ public class SocketHandle implements Runnable{
                         break;
                     }
 
-//                    case "GET_OTHER_USER" : {
-//                        roomController.boardCast3(this);
-//                    }
-
                     // type: JOIN_ROOM_REQUEST | object: idRoom
                     case "JOIN_ROOM_REQUEST": {
                         int idRoom = Integer.parseInt(receiveMessage.getObject() + "");
@@ -351,10 +347,14 @@ public class SocketHandle implements Runnable{
 
                     case "GET_HISTORY_REQUEST": {
                         List<Histories> lst = historyDAO.getAllHistory(this.user);
-                        if(lst != null)
+                        if(lst != null){
                             this.write( "GET_HISTORY_SUCCESS", lst);
-                        else
+                            System.out.println("Đã gửi thành công");
+                        }
+                        else {
                             this.write( "GET_HISTORY_FAIL", false);
+                            System.out.println("Gửi thất bại");
+                        }
 
                         break;
                     }

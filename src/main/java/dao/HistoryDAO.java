@@ -26,10 +26,13 @@ public class HistoryDAO extends DAO{
             ResultSet rs = pstm.executeQuery();
 
             UserDAO userDAO = new UserDAO();
-            Users owner = userDAO.getOne(rs.getInt(5));
-            Users opponent = userDAO.getOne(rs.getInt(6));
+
+
 
             while (rs.next()) {
+                Users owner = userDAO.getOne(rs.getInt(5));
+                Users opponent = userDAO.getOne(rs.getInt(6));
+
                 Histories hst = new Histories(
                         rs.getInt(1),
                         rs.getTimestamp(2).toLocalDateTime(),
@@ -44,6 +47,7 @@ public class HistoryDAO extends DAO{
             return arr;
         }
         catch(SQLException e) {
+            e.printStackTrace();
             return null;
         }
     }
