@@ -8,26 +8,26 @@ public class Histories implements Serializable {
     private LocalDateTime timeStart;
     private LocalDateTime timeEnd;
     private boolean isWin;
-    private int opponentId;
-    private int ownerId;
+    private Users owner;
+    private Users opponent;
 
     public Histories() {}
 
-    public Histories(int id, LocalDateTime timeStart, LocalDateTime timeEnd, boolean isWin, int opponentId, int ownerId) {
+    public Histories(int id, LocalDateTime timeStart, LocalDateTime timeEnd, boolean isWin, Users owner, Users opponent) {
         this.id = id;
         this.timeStart = timeStart;
         this.timeEnd = timeEnd;
         this.isWin = isWin;
-        this.opponentId = opponentId;
-        this.ownerId = ownerId;
+        this.owner = owner;
+        this.opponent = opponent;
     }
 
-    public Histories(LocalDateTime timeStart, LocalDateTime timeEnd, boolean isWin, int opponentId, int ownerId) {
+    public Histories(LocalDateTime timeStart, LocalDateTime timeEnd, boolean isWin, Users owner, Users opponent) {
         this.timeStart = timeStart;
         this.timeEnd = timeEnd;
         this.isWin = isWin;
-        this.opponentId = opponentId;
-        this.ownerId = ownerId;
+        this.opponent = opponent;
+        this.owner = owner;
     }
 
     public int getId() {
@@ -38,12 +38,12 @@ public class Histories implements Serializable {
         return isWin;
     }
 
-    public int getOpponentId() {
-        return opponentId;
+    public Users getOpponent() {
+        return opponent;
     }
 
-    public int getOwnerId() {
-        return ownerId;
+    public Users getOwner() {
+        return owner;
     }
 
     public LocalDateTime getTimeStart() {
@@ -54,12 +54,12 @@ public class Histories implements Serializable {
         return timeEnd;
     }
 
-    public void setOpponentId(int opponentId) {
-        this.opponentId = opponentId;
+    public void setOpponent(Users opponent) {
+        this.opponent = opponent;
     }
 
-    public void setOwnerId(int ownerId) {
-        this.ownerId = ownerId;
+    public void setOwner(Users owner) {
+        this.owner = owner;
     }
 
     public void setTimeStart(LocalDateTime timeStart) {
@@ -76,6 +76,6 @@ public class Histories implements Serializable {
 
     @Override
     public String toString() {
-        return this.id + " " + this.ownerId + " " + this.opponentId + " " + this.isWin;
+        return this.id + " " + this.owner + " " + this.opponent + " " + this.isWin;
     }
 }

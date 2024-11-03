@@ -13,6 +13,31 @@ public class UserDAO extends DAO {
         super();
     }
 
+    public Users getOne(int id) {
+        try {
+            String sql = "SELECT * FROM users WHERE id=?";
+            PreparedStatement pstm = this.conn.prepareStatement(sql);
+            pstm.setInt(1, id);
+            ResultSet rs = pstm.executeQuery();
+            if(rs.next()) {
+                return new Users(
+                        rs.getInt(1),
+                        rs.getString(2),
+                        rs.getString(3),
+                        rs.getInt(4),
+                        rs.getInt(5),
+                        rs.getInt(6),
+                        rs.getBoolean(7),
+                        rs.getBoolean(8),
+                        rs.getString(9)
+                );
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return null;
+    }
+
     public Users verifyUser(Users user) {
         try {
             String sql = "SELECT * FROM users WHERE username=? AND password=? ";

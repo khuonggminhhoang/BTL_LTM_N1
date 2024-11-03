@@ -25,14 +25,18 @@ public class HistoryDAO extends DAO{
             pstm.setInt(1, ownerId);  // Thiết lập giá trị cho dấu chấm hỏi
             ResultSet rs = pstm.executeQuery();
 
+            UserDAO userDAO = new UserDAO();
+            Users owner = userDAO.getOne(rs.getInt(5));
+            Users opponent = userDAO.getOne(rs.getInt(6));
+
             while (rs.next()) {
                 Histories hst = new Histories(
                         rs.getInt(1),
                         rs.getTimestamp(2).toLocalDateTime(),
                         rs.getTimestamp(3).toLocalDateTime(),
                         rs.getBoolean(4),
-                        rs.getInt(5),
-                        rs.getInt(6)
+                        owner,
+                        opponent
                 );
                 arr.add(hst);
             }
@@ -51,14 +55,8 @@ public class HistoryDAO extends DAO{
             pstmz.setTimestamp(1, Timestamp.valueOf(history.getTimeStart()));
             pstmz.setTimestamp(2, Timestamp.valueOf(history.getTimeEnd()));
             pstmz.setInt(3, history.isWin() ? 1 : 0);
-            pstmz.setInt(4, history.getOpponentId());
-            pstmz.setInt(5, history.getOwnerId());
-
-            System.out.println(Timestamp.valueOf(history.getTimeStart()));
-            System.out.println(Timestamp.valueOf(history.getTimeEnd()));
-            System.out.println(history.isWin());
-            System.out.println(history.getOpponentId());
-            System.out.println(history.getOwnerId());
+            pstmz.setInt(4, history.getOpponent().getId());
+            pstmz.setInt(5, history.getOwner().getId());
 
             int tmp = pstmz.executeUpdate();
             return tmp > 0;             // thành công

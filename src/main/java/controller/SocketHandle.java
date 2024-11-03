@@ -302,11 +302,11 @@ public class SocketHandle implements Runnable{
                     case "UPDATE_HISTORY_REQUEST": {
                         Histories history = (Histories) receiveMessage.getObject();
 
-                        int ownerId = this.user.getId();
-                        int opponentId = this.roomController.getOpponent(this).user.getId();
+                        Users owner = this.user;
+                        Users opponent = this.roomController.getOpponent(this).user;
 
-                        history.setOwnerId(ownerId);
-                        history.setOpponentId(opponentId);
+                        history.setOwner(owner);
+                        history.setOpponent(opponent);
 
                         boolean check = historyDAO.addHistory(history);
                         if(check) {
