@@ -238,17 +238,14 @@ public class SocketHandle implements Runnable{
                                     roomController.moveToNextQuestion();
                                     System.out.println("tăng câu hỏi");
                                 }
+                                else {
+                                    System.out.println("Hết câu hỏi");
+                                }
                                 Message sendMessage = new Message("ANSWER_CORRECT", roomController.getCurrentQuestion());
                                 roomController.broadCast(this, userAnswer);
                                 roomController.boardCast2(this);
                                 this.oos.writeObject(sendMessage);
-//                                else {
-//                                    // Kết thúc trò chơi khi hết câu hỏi
-//                                    Message endMessage = new Message("WIN_GAME", "Trò chơi kết thúc");
-//                                    roomController.broadCast(this, userAnswer);
-//                                    roomController.boardCast2(this);
-//                                    this.oos.writeObject(endMessage);
-//                                }
+
                             } else {
                                 if (userAnswer.equalsIgnoreCase("TIMEOUT!!!")) {
                                     System.out.println("Timeout");
@@ -292,12 +289,19 @@ public class SocketHandle implements Runnable{
                         } else {
                             userDao.updateUserGameResult(user, false);
                         }
+
+                        roomController.removeSocketHandle(this);
+                        System.out.println("Đã xóa người chơi " + this.user.getUsername() + "ra khỏi phòng");
+                        Users u = userDao.verifyUser(this.user);
+                        Message message = new Message("UPDATE_USER_CLIENT", u);
+                        this.oos.writeObject(message);
+
                         break;
                     }
 
                     case "UPDATE_HISTORY_REQUEST": {
                         Histories history = (Histories) receiveMessage.getObject();
-
+                        System.out.println("Client " + this.user.getUsername() + " cập nhật: " + history.isWin() );
                         Users owner = this.user;
                         Users opponent = this.roomController.getOpponent(this).user;
 
@@ -400,13 +404,4 @@ public class SocketHandle implements Runnable{
         }
     }
 
-    // Phương thức tìm phòng chứa người dùng
-    private RoomController findRoomByUser(SocketHandle userSocket) {
-        for (RoomController room : Server.lstRoomController) {
-            if (room.containsUser(userSocket)) {
-                return room;
-            }
-        }
-        return null;
-    }
 }
