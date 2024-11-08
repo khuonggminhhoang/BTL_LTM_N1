@@ -185,6 +185,7 @@ public class SocketHandle implements Runnable{
                                 }
                                 userDao.updatePlayingUser(this.user, true);
                                 this.write("JOIN_ROOM_SUCCESS", "Join phòng thành công");
+                                roomController.setCurrentQuestionIndex(0);
                                 this.roomController = roomController;
                                 this.roomController.setLstQuestion(questionDAO.getThreeQuestion());
 
@@ -197,8 +198,6 @@ public class SocketHandle implements Runnable{
                         break;
                     }
                     case "START_GAME": {
-                        // Tìm RoomController chứa người chơi hiện tại
-//                        RoomController currentRoom = findRoomByUser(this);
                         if (roomController == null) {
                             System.out.println("Không tìm thấy phòng cho người chơi.");
                             break;
@@ -232,7 +231,7 @@ public class SocketHandle implements Runnable{
                             // nếu người chơi hết thời gian trả lời client gửi một message với object là null
                             if (userAnswer.equalsIgnoreCase(correctAnswer)) {
                                 // Cập nhật điểm và chuyển sang câu hỏi mới || Nếu đúng thì bên client sẽ cập nhật bên server không cần cập nhật
-    //                            currentRoom.updateScore(this.user);
+                                // currentRoom.updateScore(this.user);
                                 // Kiểm tra xem đã hết câu hỏi chưa
                                 if (roomController.hasNextQuestion()) {
                                     roomController.moveToNextQuestion();
