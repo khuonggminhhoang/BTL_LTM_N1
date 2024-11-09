@@ -7,13 +7,13 @@ public class Histories implements Serializable {
     private int id;
     private LocalDateTime timeStart;
     private LocalDateTime timeEnd;
-    private boolean isWin;
+    private String isWin;
     private Users owner;
     private Users opponent;
 
     public Histories() {}
 
-    public Histories(int id, LocalDateTime timeStart, LocalDateTime timeEnd, boolean isWin, Users owner, Users opponent) {
+    public Histories(int id, LocalDateTime timeStart, LocalDateTime timeEnd, String isWin, Users owner, Users opponent) {
         this.id = id;
         this.timeStart = timeStart;
         this.timeEnd = timeEnd;
@@ -22,7 +22,7 @@ public class Histories implements Serializable {
         this.opponent = opponent;
     }
 
-    public Histories(LocalDateTime timeStart, LocalDateTime timeEnd, boolean isWin, Users owner, Users opponent) {
+    public Histories(LocalDateTime timeStart, LocalDateTime timeEnd, String isWin, Users owner, Users opponent) {
         this.timeStart = timeStart;
         this.timeEnd = timeEnd;
         this.isWin = isWin;
@@ -34,7 +34,7 @@ public class Histories implements Serializable {
         return id;
     }
 
-    public boolean isWin() {
+    public String isWin() {
         return isWin;
     }
 
@@ -70,7 +70,7 @@ public class Histories implements Serializable {
         this.timeEnd = timeEnd;
     }
 
-    public void setWin(boolean win) {
+    public void setWin(String win) {
         isWin = win;
     }
 

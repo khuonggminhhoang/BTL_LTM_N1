@@ -378,6 +378,17 @@ public class SocketHandle implements Runnable{
                         this.roomController.removeSocketHandle(this);
                         break;
                     }
+
+                    case "UPDATE_USER_PLAYING_REQUEST": {
+                        userDao.updatePlayingUser(this.user, false);
+                        break;
+                    }
+
+                    case "UPDATE_USER_OFFLINE_REQUEST": {
+                        userDao.updateOnlineUser(this.user, false);
+                        break;
+                    }
+
                 }
             }
 
