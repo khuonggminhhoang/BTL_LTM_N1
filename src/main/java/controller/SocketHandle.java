@@ -234,12 +234,17 @@ public class SocketHandle implements Runnable{
                                 // Cập nhật điểm và chuyển sang câu hỏi mới || Nếu đúng thì bên client sẽ cập nhật bên server không cần cập nhật
     //                            currentRoom.updateScore(this.user);
                                 // Kiểm tra xem đã hết câu hỏi chưa
+                                System.out.println("ng choi trl: " + userAnswer);
                                 if (roomController.hasNextQuestion()) {
                                     roomController.moveToNextQuestion();
                                     System.out.println("tăng câu hỏi");
+
+                                } {
+                                    System.out.println("het cau hoi");
+                                    System.out.println(roomController.lstQuestion);
                                 }
                                 Message sendMessage = new Message("ANSWER_CORRECT", roomController.getCurrentQuestion());
-                                roomController.broadCast(this, userAnswer);
+//                                roomController.broadCast(this, userAnswer);
                                 roomController.boardCast2(this);
                                 this.oos.writeObject(sendMessage);
 //                                else {
@@ -275,7 +280,8 @@ public class SocketHandle implements Runnable{
                                     }
                                     continue;
                                 }
-                                System.out.println(correctAnswer);
+                                System.out.println("user answer: " + userAnswer);
+                                System.out.println("answer: " + correctAnswer);
                                 // Trả lời sai
                                 Message sendMessage = new Message("ANSWER_INCORRECT", "Đáp án không đúng.");
                                 roomController.broadCast(this, userAnswer);
@@ -367,6 +373,7 @@ public class SocketHandle implements Runnable{
                             userDao.updateUserGameResult(user, false);
                         }
                         roomController.removeSocketHandle(this);
+                        
                         break;
                     }
 
