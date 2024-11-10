@@ -20,7 +20,7 @@ public class HistoryDAO extends DAO{
         try {
             List<Histories> arr = new ArrayList<>();
             int ownerId = user.getId();
-            String sql = "SELECT * FROM histories WHERE ownerId = ?";
+            String sql = "SELECT * FROM histories WHERE ownerId = ? ORDER BY timeStart DESC ";
             PreparedStatement pstm = this.conn.prepareStatement(sql);
             pstm.setInt(1, ownerId);  // Thiết lập giá trị cho dấu chấm hỏi
             ResultSet rs = pstm.executeQuery();
@@ -35,7 +35,7 @@ public class HistoryDAO extends DAO{
                         rs.getInt(1),
                         rs.getTimestamp(2).toLocalDateTime(),
                         rs.getTimestamp(3).toLocalDateTime(),
-                        rs.getBoolean(4),
+                        rs.getString(4),
                         owner,
                         opponent
                 );
@@ -52,11 +52,12 @@ public class HistoryDAO extends DAO{
 
     public boolean addHistory(Histories history) {
         try {
+
             String sqlz = "INSERT INTO histories(timeStart, timeEnd, isWin, opponentId, ownerId) values (?, ?, ?, ?, ?)";
             PreparedStatement pstmz = this.conn.prepareStatement(sqlz);
             pstmz.setTimestamp(1, Timestamp.valueOf(history.getTimeStart()));
             pstmz.setTimestamp(2, Timestamp.valueOf(history.getTimeEnd()));
-            pstmz.setInt(3, history.isWin() ? 1 : 0);
+            pstmz.setString(3, history.isWin());
             pstmz.setInt(4, history.getOpponent().getId());
             pstmz.setInt(5, history.getOwner().getId());
 

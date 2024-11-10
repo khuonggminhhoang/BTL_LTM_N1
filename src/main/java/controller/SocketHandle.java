@@ -185,6 +185,7 @@ public class SocketHandle implements Runnable{
                                 }
                                 userDao.updatePlayingUser(this.user, true);
                                 this.write("JOIN_ROOM_SUCCESS", "Join phòng thành công");
+                                roomController.setCurrentQuestionIndex(0);
                                 this.roomController = roomController;
                                 this.roomController.setLstQuestion(questionDAO.getThreeQuestion());
 
@@ -197,8 +198,6 @@ public class SocketHandle implements Runnable{
                         break;
                     }
                     case "START_GAME": {
-                        // Tìm RoomController chứa người chơi hiện tại
-//                        RoomController currentRoom = findRoomByUser(this);
                         if (roomController == null) {
                             System.out.println("Không tìm thấy phòng cho người chơi.");
                             break;
@@ -232,7 +231,7 @@ public class SocketHandle implements Runnable{
                             // nếu người chơi hết thời gian trả lời client gửi một message với object là null
                             if (userAnswer.equalsIgnoreCase(correctAnswer)) {
                                 // Cập nhật điểm và chuyển sang câu hỏi mới || Nếu đúng thì bên client sẽ cập nhật bên server không cần cập nhật
-    //                            currentRoom.updateScore(this.user);
+                                // currentRoom.updateScore(this.user);
                                 // Kiểm tra xem đã hết câu hỏi chưa
                                 System.out.println("ng choi trl: " + userAnswer);
                                 if (roomController.hasNextQuestion()) {
@@ -243,17 +242,14 @@ public class SocketHandle implements Runnable{
                                     System.out.println("het cau hoi");
                                     System.out.println(roomController.lstQuestion);
                                 }
+                                else {
+                                    System.out.println("Hết câu hỏi");
+                                }
                                 Message sendMessage = new Message("ANSWER_CORRECT", roomController.getCurrentQuestion());
 //                                roomController.broadCast(this, userAnswer);
                                 roomController.boardCast2(this);
                                 this.oos.writeObject(sendMessage);
-//                                else {
-//                                    // Kết thúc trò chơi khi hết câu hỏi
-//                                    Message endMessage = new Message("WIN_GAME", "Trò chơi kết thúc");
-//                                    roomController.broadCast(this, userAnswer);
-//                                    roomController.boardCast2(this);
-//                                    this.oos.writeObject(endMessage);
-//                                }
+
                             } else {
                                 if (userAnswer.equalsIgnoreCase("TIMEOUT!!!")) {
                                     System.out.println("Timeout");
@@ -298,12 +294,19 @@ public class SocketHandle implements Runnable{
                         } else {
                             userDao.updateUserGameResult(user, false);
                         }
+
+                        roomController.removeSocketHandle(this);
+                        System.out.println("Đã xóa người chơi " + this.user.getUsername() + "ra khỏi phòng");
+                        Users u = userDao.verifyUser(this.user);
+                        Message message = new Message("UPDATE_USER_CLIENT", u);
+                        this.oos.writeObject(message);
+
                         break;
                     }
 
                     case "UPDATE_HISTORY_REQUEST": {
                         Histories history = (Histories) receiveMessage.getObject();
-
+                        System.out.println("Client " + this.user.getUsername() + " cập nhật: " + history.isWin() );
                         Users owner = this.user;
                         Users opponent = this.roomController.getOpponent(this).user;
 
@@ -382,6 +385,17 @@ public class SocketHandle implements Runnable{
                         this.roomController.removeSocketHandle(this);
                         break;
                     }
+
+                    case "UPDATE_USER_PLAYING_REQUEST": {
+                        userDao.updatePlayingUser(this.user, false);
+                        break;
+                    }
+
+                    case "UPDATE_USER_OFFLINE_REQUEST": {
+                        userDao.updateOnlineUser(this.user, false);
+                        break;
+                    }
+
                 }
             }
 
@@ -407,13 +421,4 @@ public class SocketHandle implements Runnable{
         }
     }
 
-    // Phương thức tìm phòng chứa người dùng
-    private RoomController findRoomByUser(SocketHandle userSocket) {
-        for (RoomController room : Server.lstRoomController) {
-            if (room.containsUser(userSocket)) {
-                return room;
-            }
-        }
-        return null;
-    }
 }

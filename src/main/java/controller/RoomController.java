@@ -18,6 +18,10 @@ public class RoomController {
         numTimeout++;
     }
 
+    public void setCurrentQuestionIndex(int currentQuestionIndex) {
+        this.currentQuestionIndex = currentQuestionIndex;
+    }
+
     public int getNumTimeout() {
         return numTimeout;
     }
