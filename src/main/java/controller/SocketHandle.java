@@ -234,19 +234,29 @@ public class SocketHandle implements Runnable{
                                 // currentRoom.updateScore(this.user);
                                 // Kiểm tra xem đã hết câu hỏi chưa
                                 System.out.println("ng choi trl: " + userAnswer);
+
                                 if (roomController.hasNextQuestion()) {
                                     roomController.moveToNextQuestion();
-                                    System.out.println("tăng câu hỏi");
+                                    System.out.println("next question - send answer");
 
-                                } {
-                                    System.out.println("het cau hoi");
+                                } else {
+                                    System.out.println("no more question and end game");
                                     System.out.println(roomController.lstQuestion);
+//                                    Message endGameMessage = new Message("ENDGAME_RESPONSE", "");
+//                                    this.oos.writeObject(endGameMessage);
+//                                    continue;
+                                    Message sendMessage = new Message("ANSWER_CORRECT", roomController.getCurrentQuestion());
+                                    roomController.boardCast2(this);
+                                    this.oos.writeObject(sendMessage);
+                                    Message finishGameMessage = new Message("FINISH_GAME", "");
+                                    this.oos.writeObject(finishGameMessage);
+                                    roomController.boardCast5(this);
+                                    System.out.println("boardcast5 to finish game");
                                 }
-                                else {
-                                    System.out.println("Hết câu hỏi");
-                                }
+//                                else {
+//                                    System.out.println("Hết câu hỏi");
+//                                }
                                 Message sendMessage = new Message("ANSWER_CORRECT", roomController.getCurrentQuestion());
-//                                roomController.broadCast(this, userAnswer);
                                 roomController.boardCast2(this);
                                 this.oos.writeObject(sendMessage);
 
